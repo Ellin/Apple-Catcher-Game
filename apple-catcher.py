@@ -16,20 +16,29 @@ winX = win.size[0]
 winY = win.size[1]
 
 # Window edges (units = norm)
-topWinEdge = 1
-bottomWinEdge = -1
-leftWinEdge = -1
-rightWinEdge = 1
-windowHeight = 2
+topWinEdge = 1.0
+bottomWinEdge = -1.0
+leftWinEdge = -1.0
+rightWinEdge = 1.0
+windowWidth = 2.0
+windowHeight = 2.0
 
 # Specify game play area (units = norm)
-topGameAreaEdge = topWinEdge
-bottomGameAreaEdge = bottomWinEdge + (windowHeight/float(8)) # The bottom of the game play area is 1/8 from the bottom of the window
-leftGameAreaEdge = leftWinEdge
-rightGameAreaEdge = rightWinEdge
-gameAreaHeight = abs(topGameAreaEdge - bottomGameAreaEdge)
-gameAreaWidth = abs(leftGameAreaEdge - rightGameAreaEdge)
-gameAreaPosX = rightGameAreaEdge - gameAreaWidth/2.0
+gameAreaWidth = windowWidth
+gameAreaHeight = windowHeight * (7.0/8.0) # The game play area is 7/8th the size of the window
+gameAreaPosX = 0
+gameAreaPosY = (windowHeight - gameAreaHeight)/2.0
+topGameAreaEdge = gameAreaPosY + gameAreaHeight/2.0
+bottomGameAreaEdge = gameAreaPosY - gameAreaHeight/2.0
+leftGameAreaEdge = gameAreaPosX - gameAreaWidth/2.0
+rightGameAreaEdge = gameAreaPosX + gameAreaWidth/2.0
+
+# Specify game options box
+optionsBoxWidth = windowWidth
+optionsBoxHeight = windowHeight - gameAreaHeight
+optionsBoxPosX = 0
+optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
+optionsBox = visual.Rect(win, width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
 
 # Background image parameters environment
 bkgimg = 'mtn.jpg'
@@ -67,7 +76,13 @@ score = 0 # +1 point for every apple caught
 gamePaused = 1
 
 # Score display
-scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = "white", height = 0.1, pos = (0,-0.85))
+scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
+
+# Pause button (CONDITION 1 ONLY)
+pauseButtonPosX = -0.75
+pauseButtonPosY = optionsBoxPosY
+pauseButton = visual.Rect(win, width = 0.3, height = 0.15, pos = (pauseButtonPosX, pauseButtonPosY))
+pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonPosX, pauseButtonPosY))
 
 # Condition 1
 ## Condition 1 can change difficulty levels at any time
@@ -158,6 +173,9 @@ def isAppleCaught():
 
 while not event.getKeys(keyList = ['q','space']):
 	bkg.draw()
+	optionsBox.draw()
+	pauseButton.draw()
+	pauseButtonText.draw()
 	moveBasket()
 	#apple.setPos([applePosX, applePosY])
 	#apple.draw()
