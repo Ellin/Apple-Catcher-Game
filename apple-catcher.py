@@ -74,6 +74,7 @@ applePosY = 1.025
 # Other game variables
 score = 0 # +1 point for every apple caught
 gamePaused = 1
+mouse = event.Mouse()
 
 # Score display
 scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
@@ -101,6 +102,9 @@ pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height =
 ## if condition 1,
 # Change difficulty level (i.e. speed of falling apples)
 
+def pauseGame():
+	print 'hi'
+
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
 	basketBottomEdge = basketPosY - basketHeight/2.0
@@ -119,7 +123,6 @@ def getAppleEdges():
 ## instead of click and estimate, you're able to slide the basket around actively as the apples fall?
 ## set basket x position to the mouse x position (don't change the y coordinates)
 def moveBasket():
-    mouse = event.Mouse()
     mousePos = mouse.getPos()
     global basketPosX # NEEDED or else the next line doesn't update basketPosX on a global level
     basketPosX = mousePos[0] # Move basket with horizontal mouse movement
@@ -170,6 +173,7 @@ def isAppleCaught():
 
 
 # Write data to file
+pauseButtonPressStarted = 0
 
 while not event.getKeys(keyList = ['q','space']):
 	bkg.draw()
@@ -181,5 +185,24 @@ while not event.getKeys(keyList = ['q','space']):
 	#apple.draw()
 	dropApple()
 	scoreDisplay.draw()
+
+	if mouse.isPressedIn(pauseButton) & (pauseButtonPressStarted == 0):
+		pauseButtonPressStarted = 1
+		print 'initial press'
+	elif (mouse.isPressedIn(pauseButton) == 0) & pauseButton.contains(mouse) & pauseButtonPressStarted: # Mouse click is released inside of pause button.. 
+		pauseButtonPressStarted = 0
+		gamePaused = 1
+		bkg.opacity = 0.7
+		print 'paused'
+	elif (mouse.isPressedIn(pauseButton) == 0) & (pauseButton.contains(mouse) == 0) & pauseButtonPressStarted: # Mouse click is released outside of pause button
+		pauseButtonPressStarted = 0
+		print 'released outside'
+
+	event.clearEvents()
+	mouse.clickReset()
+
+	# cmouse = visual.CustomMouse(win, clickOnUp = True)
+	# if cmouse.getPressed()[0]:
+	# 	print 'cpressed'	
 	win.flip()
 
