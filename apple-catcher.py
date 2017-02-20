@@ -1,4 +1,5 @@
 from psychopy import event, gui, visual
+import button
 
 # Get participant's name, age, gender via a dialog box
 participantDlg = gui.Dlg()
@@ -45,7 +46,6 @@ bkgimg = 'mtn.jpg'
 bkgPosX = leftGameAreaEdge + gameAreaWidth/2.0
 bkgPosY = topGameAreaEdge - gameAreaHeight/2.0
 bkg = visual.ImageStim(win, image = bkgimg, size = (gameAreaWidth, gameAreaHeight), pos = (bkgPosX, bkgPosY), opacity = 1)
-#bkg.autoDraw = True
 
 # Basket parameters (norm units)
 basketWidth = 0.1
@@ -80,10 +80,12 @@ mouse = event.Mouse()
 scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
 
 # Pause button (CONDITION 1 ONLY)
-pauseButtonPosX = -0.75
-pauseButtonPosY = optionsBoxPosY
-pauseButton = visual.Rect(win, width = 0.3, height = 0.15, pos = (pauseButtonPosX, pauseButtonPosY))
-pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonPosX, pauseButtonPosY))
+pauseButtonBoxPosX = -0.75
+pauseButtonBoxPosY = optionsBoxPosY
+pauseButtonBox = visual.Rect(win, width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButton = button.Button(pauseButtonBox, mouse)
+
 
 # Condition 1
 ## Condition 1 can change difficulty levels at any time
@@ -102,8 +104,11 @@ pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height =
 ## if condition 1,
 # Change difficulty level (i.e. speed of falling apples)
 
-def pauseGame():
-	print 'hi'
+# def pauseGame():
+# 	global gamePaused
+# 	while gamePaused:
+# 		print 'paused'
+
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -126,9 +131,8 @@ def moveBasket():
     mousePos = mouse.getPos()
     global basketPosX # NEEDED or else the next line doesn't update basketPosX on a global level
     basketPosX = mousePos[0] # Move basket with horizontal mouse movement
-
-    # Restrict basket within the game area
     basketEdges = getBasketEdges()
+    # Restrict basket within the game area
     if basketEdges['left'] <= leftGameAreaEdge:
     	basketPosX = leftGameAreaEdge + basketWidth/2
     elif basketEdges['right'] >= rightGameAreaEdge:
@@ -154,11 +158,12 @@ def dropApple():
 		applePosY = appleStartPosY # Reset apple
 
 # Specify when apples are caught
+# (An apple is considered "caught" if the apple touches the basket and it hasn't touched the ground)
 def isAppleCaught():
  	global score
  	basketEdges = getBasketEdges()
  	appleEdges = getAppleEdges()
- 	if (appleEdges['bottom'] <= basketEdges['top']) & (appleEdges['bottom'] >= basketEdges['bottom']) & (appleEdges['left'] <= basketEdges['right']) & (appleEdges['right'] >= basketEdges['left']):
+ 	if (appleEdges['bottom'] <= basketEdges['top']) & (appleEdges['bottom'] > basketEdges['bottom']) & (appleEdges['left'] <= basketEdges['right']) & (appleEdges['right'] >= basketEdges['left']):
  		appleCaught = True
  		score += 1
  		scoreDisplay.setText('Score: ' + str(score))
@@ -166,43 +171,20 @@ def isAppleCaught():
 		appleCaught = False
 	return appleCaught
 
-## if the apple's coordinates overlap with the basket coordinates...
-
-# Display score
-
-
-
 # Write data to file
-pauseButtonPressStarted = 0
-
 while not event.getKeys(keyList = ['q','space']):
 	bkg.draw()
 	optionsBox.draw()
-	pauseButton.draw()
+	pauseButtonBox.draw()
 	pauseButtonText.draw()
 	moveBasket()
-	#apple.setPos([applePosX, applePosY])
-	#apple.draw()
 	dropApple()
 	scoreDisplay.draw()
 
-	if mouse.isPressedIn(pauseButton) & (pauseButtonPressStarted == 0):
-		pauseButtonPressStarted = 1
-		print 'initial press'
-	elif (mouse.isPressedIn(pauseButton) == 0) & pauseButton.contains(mouse) & pauseButtonPressStarted: # Mouse click is released inside of pause button.. 
-		pauseButtonPressStarted = 0
-		gamePaused = 1
-		bkg.opacity = 0.7
-		print 'paused'
-	elif (mouse.isPressedIn(pauseButton) == 0) & (pauseButton.contains(mouse) == 0) & pauseButtonPressStarted: # Mouse click is released outside of pause button
-		pauseButtonPressStarted = 0
-		print 'released outside'
+	if pauseButton.isClicked():
+		bkg.opacity = 0.5
 
 	event.clearEvents()
 	mouse.clickReset()
-
-	# cmouse = visual.CustomMouse(win, clickOnUp = True)
-	# if cmouse.getPressed()[0]:
-	# 	print 'cpressed'	
 	win.flip()
 
