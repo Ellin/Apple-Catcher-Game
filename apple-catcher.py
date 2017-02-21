@@ -73,7 +73,7 @@ applePosY = 1.025
 
 # Other game variables
 score = 0 # +1 point for every apple caught
-gamePaused = 1
+gamePaused = 0
 mouse = event.Mouse()
 
 # Score display
@@ -182,7 +182,13 @@ while not event.getKeys(keyList = ['q','space']):
 	scoreDisplay.draw()
 
 	if pauseButton.isClicked():
-		bkg.opacity = 0.5
+		gamePaused = 1 - gamePaused # gamePaused is always 0 or 1
+		if gamePaused:
+			bkg.opacity = 0.5
+			pauseButtonText.text = 'Resume'
+		else:
+			bkg.opacity = 1
+			pauseButtonText.text = 'Pause'
 
 	event.clearEvents()
 	mouse.clickReset()
