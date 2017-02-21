@@ -160,7 +160,6 @@ def moveBasket():
     	basketPosX = rightGameAreaEdge - basketWidth/2
 
     basket.setPos([basketPosX, basketPosY])
-    basket.draw()
 
 # Animate apples falling
 ## while applesLeft > 0 & game not paused...
@@ -174,7 +173,6 @@ def dropApple():
 	elif appleEdges['bottom'] > bottomGameAreaEdge: # If apple is still falling...
 		applePosY -= appleDecrement
 		apple.setPos([applePosX, applePosY])
-		apple.draw()
 	else: # If the apple hit the ground...
 		applePosY = appleStartPosY # Reset apple
 
@@ -201,8 +199,11 @@ while not event.getKeys(keyList = ['q','space']):
 		optionsBox.draw()
 		pauseButtonBox.draw()
 		pauseButtonText.draw()
-		moveBasket()
-		dropApple()
+		if (not gamePaused):
+			moveBasket()
+			dropApple()
+		basket.draw()
+		apple.draw()
 		bkgPauseOverlay.draw()
 		scoreDisplay.draw()
 
