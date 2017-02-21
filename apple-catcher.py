@@ -10,7 +10,7 @@ participantDlg.addField('Condition:')
 participantDlg.show()
 
 # Generate window
-win = visual.Window(fullscr = True, units = 'norm')
+win = visual.Window(fullscr = True, color = "white", units = 'norm')
 
 # Get window width and height (units = pixels)
 winX = win.size[0]
@@ -23,6 +23,20 @@ leftWinEdge = -1.0
 rightWinEdge = 1.0
 windowWidth = 2.0
 windowHeight = 2.0
+
+# Get mouse
+mouse = event.Mouse()
+
+# Instruction screen
+instructionsC1 = "Condition 1 instructions here"
+instructionsC2 = "Condition 2 instructions here"
+instructionsC3 = "Condition 3 instructions here"
+instructions = visual.TextStim(win, text = instructionsC1, color = 'black', height = 0.08)
+startButtonBoxPosX = 0
+startButtonBoxPosY = -0.5
+startButtonBox = visual.Rect(win, width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
+startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
+startButton = button.Button(startButtonBox, mouse)
 
 # Specify game play area (units = norm)
 gameAreaWidth = windowWidth
@@ -39,13 +53,14 @@ optionsBoxWidth = windowWidth
 optionsBoxHeight = windowHeight - gameAreaHeight
 optionsBoxPosX = 0
 optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
-optionsBox = visual.Rect(win, width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
+optionsBox = visual.Rect(win, fillColor = "grey", width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
 
 # Background image parameters environment
 bkgimg = 'mtn.jpg'
 bkgPosX = leftGameAreaEdge + gameAreaWidth/2.0
 bkgPosY = topGameAreaEdge - gameAreaHeight/2.0
 bkg = visual.ImageStim(win, image = bkgimg, size = (gameAreaWidth, gameAreaHeight), pos = (bkgPosX, bkgPosY), opacity = 1)
+bkgPauseOverlay = visual.Rect(win, fillColor = "white", width = gameAreaWidth, height = gameAreaHeight, pos = (bkgPosX, bkgPosY), opacity = 0)
 
 # Basket parameters (norm units)
 basketWidth = 0.1
@@ -73,8 +88,8 @@ applePosY = 1.025
 
 # Other game variables
 score = 0 # +1 point for every apple caught
+gameStarted = 0
 gamePaused = 0
-mouse = event.Mouse()
 
 # Score display
 scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
@@ -82,10 +97,9 @@ scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'whit
 # Pause button (CONDITION 1 ONLY)
 pauseButtonBoxPosX = -0.75
 pauseButtonBoxPosY = optionsBoxPosY
-pauseButtonBox = visual.Rect(win, width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButtonBox = visual.Rect(win, fillColor ="darkgrey", width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 pauseButton = button.Button(pauseButtonBox, mouse)
-
 
 # Condition 1
 ## Condition 1 can change difficulty levels at any time
@@ -109,6 +123,13 @@ pauseButton = button.Button(pauseButtonBox, mouse)
 # 	while gamePaused:
 # 		print 'paused'
 
+def displayInstructions():
+	global gameStarted
+	instructions.draw()
+	startButtonBox.draw()
+	startButtonText.draw()
+	if startButton.isClicked():
+		gameStarted = 1
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -173,22 +194,26 @@ def isAppleCaught():
 
 # Write data to file
 while not event.getKeys(keyList = ['q','space']):
-	bkg.draw()
-	optionsBox.draw()
-	pauseButtonBox.draw()
-	pauseButtonText.draw()
-	moveBasket()
-	dropApple()
-	scoreDisplay.draw()
+	if (not gameStarted):
+		displayInstructions()
+	else:
+		bkg.draw()
+		optionsBox.draw()
+		pauseButtonBox.draw()
+		pauseButtonText.draw()
+		moveBasket()
+		dropApple()
+		bkgPauseOverlay.draw()
+		scoreDisplay.draw()
 
-	if pauseButton.isClicked():
-		gamePaused = 1 - gamePaused # gamePaused is always 0 or 1
-		if gamePaused:
-			bkg.opacity = 0.5
-			pauseButtonText.text = 'Resume'
-		else:
-			bkg.opacity = 1
-			pauseButtonText.text = 'Pause'
+		if pauseButton.isClicked():
+			gamePaused = 1 - gamePaused # gamePaused is always 0 or 1
+			if gamePaused:
+				bkgPauseOverlay.opacity = 0.5
+				pauseButtonText.text = 'Resume'
+			else:
+				bkgPauseOverlay.opacity = 0
+				pauseButtonText.text = 'Pause'
 
 	event.clearEvents()
 	mouse.clickReset()
