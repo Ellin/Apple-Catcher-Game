@@ -1,5 +1,5 @@
 from psychopy import event, gui, visual
-import button
+import button, random
 
 
 # Get participant's name, age, gender via a dialog box
@@ -80,16 +80,15 @@ appleWidth = 0.1
 appleHeight = appleWidth
 appleImg = 'rock.png'
 apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight))
-applePosX = 0 # TEMP INITIAL STARTING POS
 
 # Apple animation settings 
 appleDropInterval = 60 # Apple drops every 60 frames. I.e. Apple drops every second on monitors with a refresh rate of 60Hz.
 appleDropSpeed = 20
 appleDecrement = 0.01
-appleStartPosX = 0
+appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
-applePosX = 0
-applePosY = 1.025
+applePosX = appleStartPosX
+applePosY = appleStartPosY
 
 # Other game variables
 score = 0 # +1 point for every apple caught
@@ -229,18 +228,24 @@ def moveBasket():
     	basketPosX = rightGameAreaEdge - basketWidth/2.0
     basket.setPos([basketPosX, basketPosY])
 
+def resetApple():
+	global applePosX
+	global applePosY
+	applePosY = appleStartPosY
+	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
+
 # Animate apples falling
 def dropApple():
 	global applePosY
 	appleEdges = getAppleEdges()
 	appleCaught = isAppleCaught()
 	if appleCaught:
-		applePosY = appleStartPosY # Reset apple
+		resetApple()
 	elif appleEdges['bottom'] > bottomGameAreaEdge: # If apple is still falling...
 		applePosY -= appleDecrement
 		apple.setPos([applePosX, applePosY])
 	else: # If the apple hit the ground...
-		applePosY = appleStartPosY # Reset apple
+		resetApple()
 
 # Specify when apples are caught
 # (An apple is considered "caught" if the apple touches the basket and it hasn't touched the ground)
