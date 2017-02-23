@@ -1,16 +1,20 @@
 from psychopy import event, gui, visual
 import button
 
+
 # Get participant's name, age, gender via a dialog box
 participantDlg = gui.Dlg()
-participantDlg.addField('Name:')
-participantDlg.addField('Age:')
+participantDlg.addField('ID:')
+participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Gender:', choices = ['Female', 'Male', 'Other'])
-participantDlg.addField('Condition:')
+participantDlg.addText('                                                                                                               ')
+participantDlg.addField('Experimenter Code:')
+participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
 # Generate window
 win = visual.Window(fullscr = True, color = "white", units = 'norm')
+
 
 # Get window width and height (units = pixels)
 winX = win.size[0]
@@ -40,8 +44,8 @@ startButton = button.Button(startButtonBox, mouse)
 
 # Specify game play area (units = norm)
 gameAreaWidth = windowWidth
-gameAreaHeight = windowHeight * (7.0/8.0) # The game play area is 7/8th the size of the window
-gameAreaPosX = 0
+gameAreaHeight = windowHeight * (9.0/10.0) # The game play area is 9/10th the size of the window
+gameAreaPosX = 0 
 gameAreaPosY = (windowHeight - gameAreaHeight)/2.0
 topGameAreaEdge = gameAreaPosY + gameAreaHeight/2.0
 bottomGameAreaEdge = gameAreaPosY - gameAreaHeight/2.0
@@ -61,6 +65,7 @@ bkgPosX = leftGameAreaEdge + gameAreaWidth/2.0
 bkgPosY = topGameAreaEdge - gameAreaHeight/2.0
 bkg = visual.ImageStim(win, image = bkgimg, size = (gameAreaWidth, gameAreaHeight), pos = (bkgPosX, bkgPosY), opacity = 1)
 bkgPauseOverlay = visual.Rect(win, fillColor = "white", width = gameAreaWidth, height = gameAreaHeight, pos = (bkgPosX, bkgPosY), opacity = 0)
+
 
 # Basket parameters (norm units)
 basketWidth = 0.1
@@ -131,6 +136,74 @@ def displayInstructions():
 	if startButton.isClicked():
 		gameStarted = 1
 
+
+# Difficulty scale
+
+# parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
+scaleColor = 'white'
+scaleWidth = 0.5 #changeable
+scaleHeight = 0.05
+scalePosX = 0.6 #changeable
+scalePosY = optionsBoxPosY #changeable
+
+barWidth = scaleWidth* 0.8
+barPosX = scalePosX
+barPosY = scalePosY
+barLeftEdge = barPosX - barWidth/2.0
+barRightEdge = barPosX + barWidth/2.0
+bar = visual.Line(win, lineColor = scaleColor, start = (barLeftEdge, scalePosY), end = (barRightEdge, scalePosY))
+
+scaleButtonWidth = scaleWidth * 0.1
+leftButton = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barLeftEdge - scaleButtonWidth/2.0, barPosY), ori = -90)
+rightButton = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barRightEdge + scaleButtonWidth/2.0, barPosY), ori = 90)
+
+tickIntervalWidth = barWidth/6.0 # 7 ticks => 6 intervals
+tickYStart = scalePosY - scaleHeight/2.0
+tickYEnd = scalePosY + scaleHeight/2.0
+tick1PosX = barLeftEdge
+tick2PosX = barPosX - (2*tickIntervalWidth)
+tick3PosX = barPosX - (1*tickIntervalWidth)
+tick4PosX = barPosX
+tick5PosX = barPosX + (1*tickIntervalWidth)
+tick6PosX = barPosX + (2*tickIntervalWidth)
+tick7PosX = barRightEdge
+tick1 = visual.Line(win, lineColor = scaleColor, start = (tick1PosX, tickYStart), end = (tick1PosX, tickYEnd))
+tick2 = visual.Line(win, lineColor = scaleColor, start = (tick2PosX, tickYStart), end = (tick2PosX, tickYEnd))
+tick3 = visual.Line(win, lineColor = scaleColor, start = (tick3PosX, tickYStart), end = (tick3PosX, tickYEnd))
+tick4 = visual.Line(win, lineColor = scaleColor, start = (tick4PosX, tickYStart), end = (tick4PosX, tickYEnd))
+tick5 = visual.Line(win, lineColor = scaleColor, start = (tick5PosX, tickYStart), end = (tick5PosX, tickYEnd))
+tick6 = visual.Line(win, lineColor = scaleColor, start = (tick6PosX, tickYStart), end = (tick6PosX, tickYEnd))
+tick7 = visual.Line(win, lineColor = scaleColor, start = (tick7PosX, tickYStart), end = (tick7PosX, tickYEnd))
+
+tickLabelPosY = barPosY - scaleHeight
+tick1Label = visual.TextStim(win, text = '1', height = scaleHeight, color = scaleColor, pos = (tick1PosX, tickLabelPosY))
+tick2Label = visual.TextStim(win, text = '2', height = scaleHeight, color = scaleColor, pos = (tick2PosX, tickLabelPosY))
+tick3Label = visual.TextStim(win, text = '3', height = scaleHeight, color = scaleColor, pos = (tick3PosX, tickLabelPosY))
+tick4Label = visual.TextStim(win, text = '4', height = scaleHeight, color = scaleColor, pos = (tick4PosX, tickLabelPosY))
+tick5Label = visual.TextStim(win, text = '5', height = scaleHeight, color = scaleColor, pos = (tick5PosX, tickLabelPosY))
+tick6Label = visual.TextStim(win, text = '6', height = scaleHeight, color = scaleColor, pos = (tick6PosX, tickLabelPosY))
+tick7Label = visual.TextStim(win, text = '7', height = scaleHeight, color = scaleColor, pos = (tick7PosX, tickLabelPosY))
+
+def displayDifficultyScale():
+	leftButton.draw()
+	rightButton.draw()
+	bar.draw()
+	tick1.draw()
+	tick2.draw()
+	tick3.draw()
+	tick4.draw()
+	tick5.draw()
+	tick6.draw()
+	tick7.draw()
+	tick1Label.draw()
+	tick2Label.draw()
+	tick3Label.draw()
+	tick4Label.draw()
+	tick5Label.draw()
+	tick6Label.draw()
+	tick7Label.draw()
+
+
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
 	basketBottomEdge = basketPosY - basketHeight/2.0
@@ -145,25 +218,20 @@ def getAppleEdges():
 	appleRightEdge = applePosX + appleWidth/2.0
 	return {'top': appleTopEdge, 'bottom': appleBottomEdge, 'left': appleLeftEdge, 'right': appleRightEdge}
 
-# Drag basket
-## instead of click and estimate, you're able to slide the basket around actively as the apples fall?
-## set basket x position to the mouse x position (don't change the y coordinates)
+# Move basket to track the mouse
 def moveBasket():
     mousePos = mouse.getPos()
     global basketPosX # NEEDED or else the next line doesn't update basketPosX on a global level
-    basketPosX = mousePos[0] # Move basket with horizontal mouse movement
+    basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
     basketEdges = getBasketEdges()
     # Restrict basket within the game area
     if basketEdges['left'] <= leftGameAreaEdge:
     	basketPosX = leftGameAreaEdge + basketWidth/2
     elif basketEdges['right'] >= rightGameAreaEdge:
     	basketPosX = rightGameAreaEdge - basketWidth/2
-
     basket.setPos([basketPosX, basketPosY])
 
 # Animate apples falling
-## while applesLeft > 0 & game not paused...
-## apples always start falling every x seconds or x frames?
 def dropApple():
 	global applePosY
 	appleEdges = getAppleEdges()
@@ -194,11 +262,13 @@ def isAppleCaught():
 while not event.getKeys(keyList = ['q','space']):
 	if (not gameStarted):
 		displayInstructions()
+
 	else:
 		bkg.draw()
 		optionsBox.draw()
 		pauseButtonBox.draw()
 		pauseButtonText.draw()
+		displayDifficultyScale()
 		if (not gamePaused):
 			moveBasket()
 			dropApple()
