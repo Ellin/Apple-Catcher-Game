@@ -38,7 +38,7 @@ instructionsC3 = "Condition 3 instructions here"
 instructions = visual.TextStim(win, text = instructionsC1, color = 'black', height = 0.08)
 startButtonBoxPosX = 0
 startButtonBoxPosY = -0.5
-startButtonBox = visual.Rect(win, width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
+startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
 startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
 startButton = button.Button(startButtonBox, mouse)
 
@@ -136,9 +136,7 @@ def displayInstructions():
 	if startButton.isClicked():
 		gameStarted = 1
 
-
 # Difficulty scale
-
 # parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
 scaleColor = 'white'
 scaleWidth = 0.5 #changeable
@@ -203,7 +201,6 @@ def displayDifficultyScale():
 	tick6Label.draw()
 	tick7Label.draw()
 
-
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
 	basketBottomEdge = basketPosY - basketHeight/2.0
@@ -218,17 +215,18 @@ def getAppleEdges():
 	appleRightEdge = applePosX + appleWidth/2.0
 	return {'top': appleTopEdge, 'bottom': appleBottomEdge, 'left': appleLeftEdge, 'right': appleRightEdge}
 
-# Move basket to track the mouse
+# Move basket to track the mouse (as long as mouse is not in the game options area)
 def moveBasket():
     mousePos = mouse.getPos()
-    global basketPosX # NEEDED or else the next line doesn't update basketPosX on a global level
-    basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
+    global basketPosX
+    if (not optionsBox.contains(mouse)):
+    	basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
     basketEdges = getBasketEdges()
     # Restrict basket within the game area
     if basketEdges['left'] <= leftGameAreaEdge:
-    	basketPosX = leftGameAreaEdge + basketWidth/2
+    	basketPosX = leftGameAreaEdge + basketWidth/2.0
     elif basketEdges['right'] >= rightGameAreaEdge:
-    	basketPosX = rightGameAreaEdge - basketWidth/2
+    	basketPosX = rightGameAreaEdge - basketWidth/2.0
     basket.setPos([basketPosX, basketPosY])
 
 # Animate apples falling
@@ -258,7 +256,7 @@ def isAppleCaught():
 		appleCaught = False
 	return appleCaught
 
-# Write data to file
+
 while not event.getKeys(keyList = ['q','space']):
 	if (not gameStarted):
 		displayInstructions()
