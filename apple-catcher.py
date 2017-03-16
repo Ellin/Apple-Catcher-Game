@@ -1,4 +1,5 @@
 from psychopy import event, gui, visual
+import pylab
 import button, random
 
 
@@ -66,7 +67,6 @@ bkgPosY = topGameAreaEdge - gameAreaHeight/2.0
 bkg = visual.ImageStim(win, image = bkgimg, size = (gameAreaWidth, gameAreaHeight), pos = (bkgPosX, bkgPosY), opacity = 1)
 bkgPauseOverlay = visual.Rect(win, fillColor = "white", width = gameAreaWidth, height = gameAreaHeight, pos = (bkgPosX, bkgPosY), opacity = 0)
 
-
 # Basket parameters (norm units)
 basketWidth = 0.1
 basketHeight = 0.08
@@ -84,7 +84,7 @@ apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight)
 # Apple animation settings 
 appleDropInterval = 60 # Apple drops every 60 frames. I.e. Apple drops every second on monitors with a refresh rate of 60Hz.
 appleDropSpeed = 20
-appleDecrement = 0.01
+appleDecrement = 0.05*gameAreaHeight
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
 applePosX = appleStartPosX
@@ -204,7 +204,7 @@ def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
 	basketBottomEdge = basketPosY - basketHeight/2.0
 	basketLeftEdge = basketPosX - basketWidth/2.0
- 	basketRightEdge = basketPosX + basketWidth/2.0
+	basketRightEdge = basketPosX + basketWidth/2.0
 	return {'top': basketTopEdge, 'bottom': basketBottomEdge, 'left': basketLeftEdge, 'right': basketRightEdge}
 
 def getAppleEdges():
@@ -216,17 +216,17 @@ def getAppleEdges():
 
 # Move basket to track the mouse (as long as mouse is not in the game options area)
 def moveBasket():
-    mousePos = mouse.getPos()
-    global basketPosX
-    if (not optionsBox.contains(mouse)):
-    	basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
-    basketEdges = getBasketEdges()
-    # Restrict basket within the game area
-    if basketEdges['left'] <= leftGameAreaEdge:
-    	basketPosX = leftGameAreaEdge + basketWidth/2.0
-    elif basketEdges['right'] >= rightGameAreaEdge:
-    	basketPosX = rightGameAreaEdge - basketWidth/2.0
-    basket.setPos([basketPosX, basketPosY])
+	mousePos = mouse.getPos()
+	global basketPosX
+	if (not optionsBox.contains(mouse)):
+		basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
+	basketEdges = getBasketEdges()
+	# Restrict basket within the game area
+	if basketEdges['left'] <= leftGameAreaEdge:
+		basketPosX = leftGameAreaEdge + basketWidth/2.0
+	elif basketEdges['right'] >= rightGameAreaEdge:
+		basketPosX = rightGameAreaEdge - basketWidth/2.0
+	basket.setPos([basketPosX, basketPosY])
 
 def resetApple():
 	global applePosX
@@ -236,30 +236,39 @@ def resetApple():
 
 # Animate apples falling
 def dropApple():
+	global score
 	global applePosY
 	appleEdges = getAppleEdges()
 	appleCaught = isAppleCaught()
 	if appleCaught:
+		score += 1
+		scoreDisplay.setText('Score: ' + str(score))
 		resetApple()
-	elif appleEdges['bottom'] > bottomGameAreaEdge: # If apple is still falling...
+	elif appleEdges['bottom'] - appleDecrement >= bottomGameAreaEdge: # If the apple bottom will stay above/on the ground with the next decrement, then continue to move the apple down
 		applePosY -= appleDecrement
 		apple.setPos([applePosX, applePosY])
-	else: # If the apple hit the ground...
+	else: # If the apple hit the ground or would be going through the ground if decremented further, then reset apple
 		resetApple()
 
 # Specify when apples are caught
 # (An apple is considered "caught" if the apple touches the basket and it hasn't touched the ground)
 def isAppleCaught():
- 	global score
- 	basketEdges = getBasketEdges()
- 	appleEdges = getAppleEdges()
- 	if (appleEdges['bottom'] <= basketEdges['top']) & (appleEdges['bottom'] > basketEdges['bottom']) & (appleEdges['left'] <= basketEdges['right']) & (appleEdges['right'] >= basketEdges['left']):
- 		appleCaught = True
- 		score += 1
- 		scoreDisplay.setText('Score: ' + str(score))
+	basketEdges = getBasketEdges()
+	appleEdges = getAppleEdges()
+
+	if (appleEdges['left'] <= basketEdges['right']) & (appleEdges['right'] >= basketEdges['left']): # If the apple is in the same horizontal space (column) as the basket...
+		if appleEdges['bottom'] - appleDecrement >= bottomGameAreaEdge: # If the apple bottom will stay above/on the ground with the next decrement, then check to see if apple is in the basket
+			if (appleEdges['bottom'] <= basketEdges['top']) & (appleEdges['bottom'] > basketEdges['bottom']): 
+				appleCaught = True
+			else:
+				appleCaught = False
+		else:
+			appleCaught = True # If the apple bottom will be going through the ground with the next decrement, then count as hit b/c it's currently above the basket (e.g. if the apple's decrement is larger than the basket, then it could skip over the basket in the next frame)
 	else:
 		appleCaught = False
 	return appleCaught
+
+win.setRecordFrameIntervals(True)
 
 
 while not event.getKeys(keyList = ['q','space']):
@@ -275,8 +284,8 @@ while not event.getKeys(keyList = ['q','space']):
 		if (not gamePaused):
 			moveBasket()
 			dropApple()
-		basket.draw()
 		apple.draw()
+		basket.draw()
 		bkgPauseOverlay.draw()
 		scoreDisplay.draw()
 
@@ -293,3 +302,7 @@ while not event.getKeys(keyList = ['q','space']):
 	mouse.clickReset()
 	win.flip()
 
+win.close()
+
+pylab.plot(win.frameIntervals)
+pylab.show()
