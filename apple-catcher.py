@@ -1,4 +1,4 @@
-from psychopy import event, gui, visual
+from psychopy import core, event, gui, visual
 import pylab
 import button, random
 
@@ -8,6 +8,8 @@ participantDlg = gui.Dlg()
 participantDlg.addField('ID:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Gender:', choices = ['Female', 'Male', 'Other'])
+participantDlg.addText('                                                                                                               ')
+participantDlg.addField('Handedness:', choices = ['Left', 'Right'])
 participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Experimenter Code:')
 participantDlg.addText('                                                                                                               ')
@@ -31,6 +33,10 @@ windowHeight = 2.0
 
 # Get mouse
 mouse = event.Mouse()
+
+# Timing
+playLength = 10 # Play time should max out at 10 minutes
+playTime = 0 # Keeps track of how long the participant plays the game & excludes pauses
 
 # Instruction screen
 instructionsC1 = "Condition 1 instructions here"
@@ -92,7 +98,6 @@ applePosY = appleStartPosY
 
 # Other game variables
 score = 0 # +1 point for every apple caught
-gameStarted = 0
 gamePaused = 0
 
 # Score display
@@ -128,12 +133,9 @@ pauseButton = button.Button(pauseButtonBox, mouse)
 # 		print 'paused'
 
 def displayInstructions():
-	global gameStarted
 	instructions.draw()
 	startButtonBox.draw()
 	startButtonText.draw()
-	if startButton.isClicked():
-		gameStarted = 1
 
 # Difficulty scale
 # parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
@@ -270,41 +272,54 @@ def isAppleCaught():
 		appleCaught = False
 	return appleCaught
 
-win.setRecordFrameIntervals(True)
+def playGame():
+	global gamePaused
+	bkg.draw()
+	optionsBox.draw()
+	pauseButtonBox.draw()
+	pauseButtonText.draw()
+	displayDifficultyScale()
+	if (not gamePaused):
+		moveBasket()
+		dropApple()
+	apple.draw()
+	basket.draw()
+	bkgPauseOverlay.draw()
+	scoreDisplay.draw()
+
+	if pauseButton.isClicked():
+		gamePaused = 1 - gamePaused # Flip pause status of game from 0 to 1 or vice versa
+		if gamePaused:
+			pauseGame()
+		else:
+			resumeGame()
+
+def pauseGame():
+	bkgPauseOverlay.opacity = 0.5
+	pauseButtonText.text = 'Resume'
+
+def resumeGame():
+	bkgPauseOverlay.opacity = 0
+	pauseButtonText.text = 'Pause'
 
 
-while not event.getKeys(keyList = ['q','space']):
-	if (not gameStarted):
-		displayInstructions()
 
-	else:
-		bkg.draw()
-		optionsBox.draw()
-		pauseButtonBox.draw()
-		pauseButtonText.draw()
-		displayDifficultyScale()
-		if (not gamePaused):
-			moveBasket()
-			dropApple()
-		apple.draw()
-		basket.draw()
-		bkgPauseOverlay.draw()
-		scoreDisplay.draw()
+# START EXPERIMENT
+#win.setRecordFrameIntervals(True)
+while not startButton.isClicked():
+	displayInstructions()
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	mouse.clickReset()
+	win.flip()
+#practiseScreen()
 
-		if pauseButton.isClicked():
-			gamePaused = 1 - gamePaused # gamePaused is always 0 or 1
-			if gamePaused:
-				bkgPauseOverlay.opacity = 0.5
-				pauseButtonText.text = 'Resume'
-			else:
-				bkgPauseOverlay.opacity = 0
-				pauseButtonText.text = 'Pause'
-
-	event.clearEvents()
+while not event.getKeys(keyList = ['q','escape']):
+	playGame()
 	mouse.clickReset()
 	win.flip()
 
 win.close()
 
-pylab.plot(win.frameIntervals)
-pylab.show()
+# pylab.plot(win.frameIntervals)
+# pylab.show()
