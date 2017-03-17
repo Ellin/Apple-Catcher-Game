@@ -35,11 +35,9 @@ windowHeight = 2.0
 mouse = event.Mouse()
 
 # Timing (Unit = seconds)
-gamePlayLength = 120 # Play time should max out at 10 minutes
-gamePlayTime = 0 # Keeps track of how long the participant plays the game & excludes pauses.
+gamePlayLength = 15 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
-dropIntervalLength = 1 # Time between apple drops (from when last apple hit the ground to when the next apple drops)
-dropIntervalTime = 0 # Keeps track of the wait time between apple drops (need to exclude paused game time)
+dropIntervalLength = 2 # Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
 pauseClock = core.Clock()
 
 # Instruction screen
@@ -285,7 +283,7 @@ def playGame():
 	displayDifficultyScale()
 	if (not gamePaused):
 		moveBasket()
-		if dropIntervalClock.getTime() >= dropIntervalLength:
+		if dropIntervalClock.getTime() >= dropIntervalLength: # This allows the apple to drop only after the drop interval has passed
 			dropApple()
 	apple.draw()
 	basket.draw()
@@ -300,23 +298,16 @@ def playGame():
 			resumeGame()
 
 def pauseGame():
-	global gamePlayTime
-	gamePlayTime += gamePlayClock.getTime()
 	bkgPauseOverlay.opacity = 0.5
 	pauseButtonText.text = 'Resume'
 	pauseClock.reset()
 
 def resumeGame():
-	gamePlayClock.reset()
+	gamePlayClock.add(pauseClock.getTime()) # This effectively subtracts the pause time from the game play time
 	dropIntervalClock.add(pauseClock.getTime())
 	bkgPauseOverlay.opacity = 0
 	pauseButtonText.text = 'Pause'
 
-def shouldPlayGame(): # returns true or false
-	if gamePaused:
-		return gamePlayTime <= gamePlayLength
-	else:
-		return gamePlayTime + gamePlayClock.getTime() <= gamePlayLength
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
@@ -330,7 +321,7 @@ while not startButton.isClicked():
 
 gamePlayClock = core.Clock()
 
-while shouldPlayGame(): # ### Could change this to "while gamePlayClock.getTime() <= gamePlayLength or gamePaused"... and add game pause time to gamePlayClock upon resume
+while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
 	playGame()
