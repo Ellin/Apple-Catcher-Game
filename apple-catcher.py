@@ -18,6 +18,8 @@ participantDlg.show()
 # Generate window
 win = visual.Window(fullscr = True, color = "white", units = 'norm')
 
+# Get frame rate
+frameRate = win.getActualFrameRate()
 
 # Get window width and height (units = pixels)
 winX = win.size[0]
@@ -35,9 +37,8 @@ windowHeight = 2.0
 mouse = event.Mouse()
 
 # Timing (Unit = seconds)
-gamePlayLength = 15 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 60 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
-dropIntervalLength = 2 # Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
 pauseClock = core.Clock()
 
 # Instruction screen
@@ -90,7 +91,11 @@ appleImg = 'rock.png'
 apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight))
 
 # Apple animation settings 
-appleDecrement = 0.05*gameAreaHeight # i.e. apple decrement = the apple drop speed
+dropIntervalLength = 4 # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
+# easiest = 4, easier = 3, easier = 2, middle = 1, harder = 0.5 harder = 0.25, hardest = 0
+appleDropTime = 8 # Unit = seconds. The time it takes for an apple to hit the ground.
+# easiest = 8, easier = 6, easier = 4, middle = 2, harder = 1, harder = 0.5, hardest = 0.25
+appleDecrement = gameAreaHeight/(frameRate*appleDropTime) # The decrement is how much down the screen the apple should drop per frame
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
 applePosX = appleStartPosX
@@ -311,6 +316,7 @@ def resumeGame():
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
+
 while not startButton.isClicked():
 	displayInstructions()
 	if event.getKeys(keyList = ['q','escape']):
@@ -319,7 +325,8 @@ while not startButton.isClicked():
 	win.flip()
 #practiseScreen()
 
-gamePlayClock = core.Clock()
+resetApple() # Initialize apple
+gamePlayClock = core.Clock() # Effectively starts the game play timer
 
 while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 	if event.getKeys(keyList = ['q','escape']):
