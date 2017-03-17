@@ -36,7 +36,7 @@ mouse = event.Mouse()
 
 # Timing
 playLength = 10 # Play time should max out at 10 minutes
-playTime = 0 # Keeps track of how long the participant plays the game & excludes pauses
+gamePlayTime = 0 # Keeps track of how long the participant plays the game & excludes pauses
 
 # Instruction screen
 instructionsC1 = "Condition 1 instructions here"
@@ -89,8 +89,7 @@ apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight)
 
 # Apple animation settings 
 appleDropInterval = 60 # Apple drops every 60 frames. I.e. Apple drops every second on monitors with a refresh rate of 60Hz.
-appleDropSpeed = 20
-appleDecrement = 0.05*gameAreaHeight
+appleDecrement = 0.05*gameAreaHeight # i.e. apple decrement = the apple drop speed
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
 applePosX = appleStartPosX
@@ -295,10 +294,13 @@ def playGame():
 			resumeGame()
 
 def pauseGame():
+	global gamePlayTime
+	gamePlayTime += gamePlayClock.getTime()
 	bkgPauseOverlay.opacity = 0.5
 	pauseButtonText.text = 'Resume'
 
 def resumeGame():
+	gamePlayClock.reset()
 	bkgPauseOverlay.opacity = 0
 	pauseButtonText.text = 'Pause'
 
@@ -313,6 +315,8 @@ while not startButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 #practiseScreen()
+
+gamePlayClock = core.Clock()
 
 while not event.getKeys(keyList = ['q','escape']):
 	playGame()
