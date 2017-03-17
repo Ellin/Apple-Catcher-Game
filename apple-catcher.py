@@ -91,10 +91,12 @@ appleImg = 'rock.png'
 apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight))
 
 # Apple animation settings 
-dropIntervalLength = 4 # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
+dropIntervalLength = 1 # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
 # easiest = 4, easier = 3, easier = 2, middle = 1, harder = 0.5 harder = 0.25, hardest = 0
-appleDropTime = 8 # Unit = seconds. The time it takes for an apple to hit the ground.
+appleDropTime = 2 # Unit = seconds. The time it takes for an apple to hit the ground.
 # easiest = 8, easier = 6, easier = 4, middle = 2, harder = 1, harder = 0.5, hardest = 0.25
+difficultyLevel = 4
+difficultyDict = {1: {'interval': 4, 'drop time': 8}, 2: {'interval': 3, 'drop time': 6}, 3: {'interval': 2, 'drop time': 4}, 4: {'interval': 1, 'drop time': 2}, 5: {'interval': 0.5, 'drop time': 1}, 6: {'interval': 0.25, 'drop time': 0.5}, 7: {'interval': 0, 'drop time': 0.25}}
 appleDecrement = gameAreaHeight/(frameRate*appleDropTime) # The decrement is how much down the screen the apple should drop per frame
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
@@ -158,8 +160,10 @@ barRightEdge = barPosX + barWidth/2.0
 bar = visual.Line(win, lineColor = scaleColor, start = (barLeftEdge, scalePosY), end = (barRightEdge, scalePosY))
 
 scaleButtonWidth = scaleWidth * 0.1
-leftButton = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barLeftEdge - scaleButtonWidth/2.0, barPosY), ori = -90)
-rightButton = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barRightEdge + scaleButtonWidth/2.0, barPosY), ori = 90)
+leftArrow = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barLeftEdge - scaleButtonWidth/2.0, barPosY), ori = -90)
+rightArrow = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barRightEdge + scaleButtonWidth/2.0, barPosY), ori = 90)
+leftArrowButton = button.Button(leftArrow, mouse)
+rightArrowButton = button.Button(rightArrow, mouse)
 
 tickIntervalWidth = barWidth/6.0 # 7 ticks => 6 intervals
 tickYStart = scalePosY - scaleHeight/2.0
@@ -189,8 +193,8 @@ tick6Label = visual.TextStim(win, text = '6', height = scaleHeight, color = scal
 tick7Label = visual.TextStim(win, text = '7', height = scaleHeight, color = scaleColor, pos = (tick7PosX, tickLabelPosY))
 
 def displayDifficultyScale():
-	leftButton.draw()
-	rightButton.draw()
+	leftArrow.draw()
+	rightArrow.draw()
 	bar.draw()
 	tick1.draw()
 	tick2.draw()
@@ -281,6 +285,12 @@ def isAppleCaught():
 
 def playGame():
 	global gamePaused
+	global applePosY
+	global difficultyLevel
+	global dropIntervalLength
+	global appleDropTime
+	global appleDecrement
+
 	bkg.draw()
 	optionsBox.draw()
 	pauseButtonBox.draw()
@@ -288,8 +298,21 @@ def playGame():
 	displayDifficultyScale()
 	if (not gamePaused):
 		moveBasket()
-		if dropIntervalClock.getTime() >= dropIntervalLength: # This allows the apple to drop only after the drop interval has passed
+		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
 			dropApple()
+	else:
+		if leftArrowButton.isClicked():
+			if difficultyLevel > 1:
+				difficultyLevel -= 1
+				dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+				appleDropTime = difficultyDict[difficultyLevel]['drop time']
+				appleDecrement = gameAreaHeight/(frameRate*appleDropTime) 
+		if rightArrowButton.isClicked():
+			if difficultyLevel < 7:
+				difficultyLevel += 1
+				dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+				appleDropTime = difficultyDict[difficultyLevel]['drop time']
+				appleDecrement = gameAreaHeight/(frameRate*appleDropTime) 
 	apple.draw()
 	basket.draw()
 	bkgPauseOverlay.draw()
