@@ -35,8 +35,8 @@ windowHeight = 2.0
 mouse = event.Mouse()
 
 # Timing
-playLength = 10 # Play time should max out at 10 minutes
-gamePlayTime = 0 # Keeps track of how long the participant plays the game & excludes pauses
+setPlayLength = 15 # Unit = seconds. Play time should max out at 10 minutes
+gamePlayTime = 0 # Unit = seconds. Keeps track of how long the participant plays the game & excludes pauses.
 
 # Instruction screen
 instructionsC1 = "Condition 1 instructions here"
@@ -304,7 +304,11 @@ def resumeGame():
 	bkgPauseOverlay.opacity = 0
 	pauseButtonText.text = 'Pause'
 
-
+def shouldPlayGame(): # returns true or false
+	if gamePaused:
+		return gamePlayTime <= setPlayLength
+	else:
+		return gamePlayTime + gamePlayClock.getTime() <= setPlayLength
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
@@ -318,7 +322,9 @@ while not startButton.isClicked():
 
 gamePlayClock = core.Clock()
 
-while not event.getKeys(keyList = ['q','escape']):
+while shouldPlayGame():
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
 	playGame()
 	mouse.clickReset()
 	win.flip()
