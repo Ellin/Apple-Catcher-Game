@@ -34,9 +34,13 @@ windowHeight = 2.0
 # Get mouse
 mouse = event.Mouse()
 
-# Timing
-setPlayLength = 15 # Unit = seconds. Play time should max out at 10 minutes
-gamePlayTime = 0 # Unit = seconds. Keeps track of how long the participant plays the game & excludes pauses.
+# Timing (Unit = seconds)
+gamePlayLength = 120 # Play time should max out at 10 minutes
+gamePlayTime = 0 # Keeps track of how long the participant plays the game & excludes pauses.
+dropIntervalClock = core.Clock()
+dropIntervalLength = 1 # Time between apple drops (from when last apple hit the ground to when the next apple drops)
+dropIntervalTime = 0 # Keeps track of the wait time between apple drops (need to exclude paused game time)
+pauseClock = core.Clock()
 
 # Instruction screen
 instructionsC1 = "Condition 1 instructions here"
@@ -88,7 +92,6 @@ appleImg = 'rock.png'
 apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight))
 
 # Apple animation settings 
-appleDropInterval = 60 # Apple drops every 60 frames. I.e. Apple drops every second on monitors with a refresh rate of 60Hz.
 appleDecrement = 0.05*gameAreaHeight # i.e. apple decrement = the apple drop speed
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
@@ -232,10 +235,12 @@ def moveBasket():
 def resetApple():
 	global applePosX
 	global applePosY
+	dropIntervalClock.reset()
 	applePosY = appleStartPosY
 	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 	while abs(applePosX - basketPosX) < basketWidth + appleWidth/2.0: # Make sure the new apple drops at least a basket width + half the apple's width away from the participant's basket to force the participant to move at least half a basket width to catch the next apple
 		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
+	apple.setPos([applePosX, applePosY])
 
 # Animate apples falling
 def dropApple():
@@ -280,7 +285,8 @@ def playGame():
 	displayDifficultyScale()
 	if (not gamePaused):
 		moveBasket()
-		dropApple()
+		if dropIntervalClock.getTime() >= dropIntervalLength:
+			dropApple()
 	apple.draw()
 	basket.draw()
 	bkgPauseOverlay.draw()
@@ -298,17 +304,19 @@ def pauseGame():
 	gamePlayTime += gamePlayClock.getTime()
 	bkgPauseOverlay.opacity = 0.5
 	pauseButtonText.text = 'Resume'
+	pauseClock.reset()
 
 def resumeGame():
 	gamePlayClock.reset()
+	dropIntervalClock.add(pauseClock.getTime())
 	bkgPauseOverlay.opacity = 0
 	pauseButtonText.text = 'Pause'
 
 def shouldPlayGame(): # returns true or false
 	if gamePaused:
-		return gamePlayTime <= setPlayLength
+		return gamePlayTime <= gamePlayLength
 	else:
-		return gamePlayTime + gamePlayClock.getTime() <= setPlayLength
+		return gamePlayTime + gamePlayClock.getTime() <= gamePlayLength
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
@@ -322,7 +330,7 @@ while not startButton.isClicked():
 
 gamePlayClock = core.Clock()
 
-while shouldPlayGame():
+while shouldPlayGame(): # ### Could change this to "while gamePlayClock.getTime() <= gamePlayLength or gamePaused"... and add game pause time to gamePlayClock upon resume
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
 	playGame()
