@@ -26,28 +26,37 @@ class Button(object):
 
 class Scale(object):
 	"""docstring for Scale.. units in norm"""
-	def __init__(self, win, color, startLevel, width, height, pos, opacity = 1):
+	def __init__(self, win, scaleColor, activeColor, startLevel, width, height, pos, opacity = 1):
 		self.win = win
-		self.color = color
+		self.scaleColor = scaleColor
+		self.activeColor = activeColor
 		self.activeLevel = startLevel # default active level is the starting level
 		self.width = width
 		self.height = height
 		self.posX = pos[0]
 		self.posY = pos[1]
 		self.opacity = opacity
+
+		# Create scale bar
 		barWidth = self.width* 0.8
 		barLeftEdge = self.posX - barWidth/2.0
 		barRightEdge = self.posX + barWidth/2.0
-		self.bar = visual.Line(self.win, lineColor = self.color, start = (barLeftEdge, self.posY), end = (barRightEdge, self.posY))
+		self.bar = visual.Line(self.win, lineColor = self.scaleColor, start = (barLeftEdge, self.posY), end = (barRightEdge, self.posY))
 
+		# Create scale arrows
 		arrowWidth = self.width * 0.1
-		self.leftArrow = visual.Polygon(win, lineColor = self.color, fillColor = self.color, edges = 3, radius = arrowWidth/2.0, pos = (barLeftEdge - arrowWidth/2.0, self.posY), ori = -90)
-		self.rightArrow = visual.Polygon(win, lineColor = self.color, fillColor = self.color, edges = 3, radius = arrowWidth/2.0, pos = (barRightEdge + arrowWidth/2.0, self.posY), ori = 90)
+		self.leftArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barLeftEdge - arrowWidth/2.0, self.posY), ori = -90)
+		self.rightArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barRightEdge + arrowWidth/2.0, self.posY), ori = 90)
+		
+		# Make the scale arrows function as buttons
 		mouse = event.Mouse()
 		self.leftArrowButton = Button(self.leftArrow, mouse)
 		self.rightArrowButton = Button(self.rightArrow, mouse)
 
+		# Calculate the space between each tick
 		tickIntervalWidth = barWidth/6.0 # 7 ticks => 6 intervals
+
+		# Calculate the end points of the tick bars
 		tickYStart = self.posY - self.height/2.0
 		tickYEnd = self.posY + self.height/2.0
 		tick1PosX = barLeftEdge
@@ -57,31 +66,50 @@ class Scale(object):
 		tick5PosX = self.posX + (1*tickIntervalWidth)
 		tick6PosX = self.posX + (2*tickIntervalWidth)
 		tick7PosX = barRightEdge
-		self.tick1 = visual.Line(self.win, lineColor = self.color, start = (tick1PosX, tickYStart), end = (tick1PosX, tickYEnd))
-		self.tick2 = visual.Line(self.win, lineColor = self.color, start = (tick2PosX, tickYStart), end = (tick2PosX, tickYEnd))
-		self.tick3 = visual.Line(self.win, lineColor = self.color, start = (tick3PosX, tickYStart), end = (tick3PosX, tickYEnd))
-		self.tick4 = visual.Line(self.win, lineColor = self.color, start = (tick4PosX, tickYStart), end = (tick4PosX, tickYEnd))
-		self.tick5 = visual.Line(self.win, lineColor = self.color, start = (tick5PosX, tickYStart), end = (tick5PosX, tickYEnd))
-		self.tick6 = visual.Line(self.win, lineColor = self.color, start = (tick6PosX, tickYStart), end = (tick6PosX, tickYEnd))
-		self.tick7 = visual.Line(self.win, lineColor = self.color, start = (tick7PosX, tickYStart), end = (tick7PosX, tickYEnd))
+
+		# Create tick bars
+		self.tick1 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick1PosX, tickYStart), end = (tick1PosX, tickYEnd))
+		self.tick2 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick2PosX, tickYStart), end = (tick2PosX, tickYEnd))
+		self.tick3 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick3PosX, tickYStart), end = (tick3PosX, tickYEnd))
+		self.tick4 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick4PosX, tickYStart), end = (tick4PosX, tickYEnd))
+		self.tick5 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick5PosX, tickYStart), end = (tick5PosX, tickYEnd))
+		self.tick6 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick6PosX, tickYStart), end = (tick6PosX, tickYEnd))
+		self.tick7 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick7PosX, tickYStart), end = (tick7PosX, tickYEnd))
 
 		tickLabelPosY = self.posY - self.height # Prevents scale labels from overlapping the scale
-		self.tick1Label = visual.TextStim(self.win, text = '1', height = self.height, color = self.color, pos = (tick1PosX, tickLabelPosY))
-		self.tick2Label = visual.TextStim(self.win, text = '2', height = self.height, color = self.color, pos = (tick2PosX, tickLabelPosY))
-		self.tick3Label = visual.TextStim(self.win, text = '3', height = self.height, color = self.color, pos = (tick3PosX, tickLabelPosY))
-		self.tick4Label = visual.TextStim(self.win, text = '4', height = self.height, color = self.color, pos = (tick4PosX, tickLabelPosY))
-		self.tick5Label = visual.TextStim(self.win, text = '5', height = self.height, color = self.color, pos = (tick5PosX, tickLabelPosY))
-		self.tick6Label = visual.TextStim(self.win, text = '6', height = self.height, color = self.color, pos = (tick6PosX, tickLabelPosY))
-		self.tick7Label = visual.TextStim(self.win, text = '7', height = self.height, color = self.color, pos = (tick7PosX, tickLabelPosY))
+
+		# Create tick labels
+		self.tick1Label = visual.TextStim(self.win, text = '1', height = self.height, color = self.scaleColor, pos = (tick1PosX, tickLabelPosY))
+		self.tick2Label = visual.TextStim(self.win, text = '2', height = self.height, color = self.scaleColor, pos = (tick2PosX, tickLabelPosY))
+		self.tick3Label = visual.TextStim(self.win, text = '3', height = self.height, color = self.scaleColor, pos = (tick3PosX, tickLabelPosY))
+		self.tick4Label = visual.TextStim(self.win, text = '4', height = self.height, color = self.scaleColor, pos = (tick4PosX, tickLabelPosY))
+		self.tick5Label = visual.TextStim(self.win, text = '5', height = self.height, color = self.scaleColor, pos = (tick5PosX, tickLabelPosY))
+		self.tick6Label = visual.TextStim(self.win, text = '6', height = self.height, color = self.scaleColor, pos = (tick6PosX, tickLabelPosY))
+		self.tick7Label = visual.TextStim(self.win, text = '7', height = self.height, color = self.scaleColor, pos = (tick7PosX, tickLabelPosY))
+
+		# Create tick dictionary
+		self.tickDict = {1: {'tick': self.tick1, 'label': self.tick1Label}, 2: {'tick': self.tick2, 'label': self.tick2Label}, 3: {'tick': self.tick3, 'label': self.tick3Label}, 4: {'tick': self.tick4, 'label': self.tick4Label}, 5: {'tick': self.tick5, 'label': self.tick5Label}, 6: {'tick': self.tick6, 'label': self.tick6Label}, 7: {'tick': self.tick7, 'label': self.tick7Label}}
+		
+		# Set active colors
+		self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+		self.tickDict[self.activeLevel]['label'].color = self.activeColor
 
 	def hasLevelChanged(self):
 		if self.leftArrowButton.isClicked():
 			if self.activeLevel > 1:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
 				self.activeLevel -= 1
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
 				return True
 		if self.rightArrowButton.isClicked():
 			if self.activeLevel < 7:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
 				self.activeLevel += 1
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
 				return True
 		return False
 
@@ -103,4 +131,22 @@ class Scale(object):
 		self.tick5Label.draw()
 		self.tick6Label.draw()
 		self.tick7Label.draw()
-		
+
+	def setOpacity(self, newOpacity):
+		self.leftArrow.opacity = newOpacity
+		self.rightArrow.opacity = newOpacity
+		self.bar.opacity = newOpacity
+		self.tick1.opacity = newOpacity
+		self.tick2.opacity = newOpacity
+		self.tick3.opacity = newOpacity
+		self.tick4.opacity = newOpacity
+		self.tick5.opacity = newOpacity
+		self.tick6.opacity = newOpacity
+		self.tick7.opacity = newOpacity
+		self.tick1Label.opacity = newOpacity
+		self.tick2Label.opacity = newOpacity
+		self.tick3Label.opacity = newOpacity
+		self.tick4Label.opacity = newOpacity
+		self.tick5Label.opacity = newOpacity
+		self.tick6Label.opacity = newOpacity
+		self.tick7Label.opacity = newOpacity

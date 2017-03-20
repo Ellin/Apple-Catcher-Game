@@ -16,7 +16,7 @@ participantDlg.addText('                                                        
 participantDlg.show()
 
 # Generate window
-win = visual.Window(fullscr = True, color = "white", units = 'norm')
+win = visual.Window(fullscr = True, color = 'white', units = 'norm')
 
 # Get frame rate
 frameRate = win.getActualFrameRate()
@@ -42,9 +42,9 @@ dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
 # Instruction screen
-instructionsC1 = "Condition 1 instructions here"
-instructionsC2 = "Condition 2 instructions here"
-instructionsC3 = "Condition 3 instructions here"
+instructionsC1 = 'Condition 1 instructions here'
+instructionsC2 = 'Condition 2 instructions here'
+instructionsC3 = 'Condition 3 instructions here'
 instructions = visual.TextStim(win, text = instructionsC1, color = 'black', height = 0.08)
 startButtonBoxPosX = 0
 startButtonBoxPosY = -0.5
@@ -67,14 +67,14 @@ optionsBoxWidth = windowWidth
 optionsBoxHeight = windowHeight - gameAreaHeight
 optionsBoxPosX = 0
 optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
-optionsBox = visual.Rect(win, fillColor = "grey", width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
+optionsBox = visual.Rect(win, fillColor = 'grey', width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
 
 # Background image parameters environment
 bkgimg = 'mtn.jpg'
 bkgPosX = leftGameAreaEdge + gameAreaWidth/2.0
 bkgPosY = topGameAreaEdge - gameAreaHeight/2.0
 bkg = visual.ImageStim(win, image = bkgimg, size = (gameAreaWidth, gameAreaHeight), pos = (bkgPosX, bkgPosY), opacity = 1)
-bkgPauseOverlay = visual.Rect(win, fillColor = "white", width = gameAreaWidth, height = gameAreaHeight, pos = (bkgPosX, bkgPosY), opacity = 0)
+bkgPauseOverlay = visual.Rect(win, fillColor = 'white', width = gameAreaWidth, height = gameAreaHeight, pos = (bkgPosX, bkgPosY), opacity = 0)
 
 # Basket parameters (norm units)
 basketWidth = 0.1
@@ -113,7 +113,7 @@ scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'whit
 # Pause button (CONDITION 1 ONLY)
 pauseButtonBoxPosX = -0.75
 pauseButtonBoxPosY = optionsBoxPosY
-pauseButtonBox = visual.Rect(win, fillColor ="darkgrey", width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 pauseButton = button.Button(pauseButtonBox, mouse)
 
@@ -146,7 +146,7 @@ def displayInstructions():
 
 # Difficulty scale
 # parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
-difficultyScale = button.Scale(win, color = 'white', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY))
+difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY))
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -256,6 +256,7 @@ def playGame():
 
 def pauseGame():
 	bkgPauseOverlay.opacity = 0.5
+	difficultyScale.setOpacity(1)
 	pauseButtonText.text = 'Resume'
 	pauseClock.reset()
 
@@ -263,6 +264,7 @@ def resumeGame():
 	gamePlayClock.add(pauseClock.getTime()) # This effectively subtracts the pause time from the game play time
 	dropIntervalClock.add(pauseClock.getTime())
 	bkgPauseOverlay.opacity = 0
+	difficultyScale.setOpacity(0.5)
 	pauseButtonText.text = 'Pause'
 
 
