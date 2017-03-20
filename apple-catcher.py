@@ -146,70 +146,7 @@ def displayInstructions():
 
 # Difficulty scale
 # parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
-scaleColor = 'white'
-scaleWidth = 0.5 #changeable
-scaleHeight = 0.05
-scalePosX = 0.6 #changeable
-scalePosY = optionsBoxPosY #changeable
-
-barWidth = scaleWidth* 0.8
-barPosX = scalePosX
-barPosY = scalePosY
-barLeftEdge = barPosX - barWidth/2.0
-barRightEdge = barPosX + barWidth/2.0
-bar = visual.Line(win, lineColor = scaleColor, start = (barLeftEdge, scalePosY), end = (barRightEdge, scalePosY))
-
-scaleButtonWidth = scaleWidth * 0.1
-leftArrow = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barLeftEdge - scaleButtonWidth/2.0, barPosY), ori = -90)
-rightArrow = visual.Polygon(win, lineColor = scaleColor, fillColor = scaleColor, edges = 3, radius = scaleButtonWidth/2.0, pos = (barRightEdge + scaleButtonWidth/2.0, barPosY), ori = 90)
-leftArrowButton = button.Button(leftArrow, mouse)
-rightArrowButton = button.Button(rightArrow, mouse)
-
-tickIntervalWidth = barWidth/6.0 # 7 ticks => 6 intervals
-tickYStart = scalePosY - scaleHeight/2.0
-tickYEnd = scalePosY + scaleHeight/2.0
-tick1PosX = barLeftEdge
-tick2PosX = barPosX - (2*tickIntervalWidth)
-tick3PosX = barPosX - (1*tickIntervalWidth)
-tick4PosX = barPosX
-tick5PosX = barPosX + (1*tickIntervalWidth)
-tick6PosX = barPosX + (2*tickIntervalWidth)
-tick7PosX = barRightEdge
-tick1 = visual.Line(win, lineColor = scaleColor, start = (tick1PosX, tickYStart), end = (tick1PosX, tickYEnd))
-tick2 = visual.Line(win, lineColor = scaleColor, start = (tick2PosX, tickYStart), end = (tick2PosX, tickYEnd))
-tick3 = visual.Line(win, lineColor = scaleColor, start = (tick3PosX, tickYStart), end = (tick3PosX, tickYEnd))
-tick4 = visual.Line(win, lineColor = scaleColor, start = (tick4PosX, tickYStart), end = (tick4PosX, tickYEnd))
-tick5 = visual.Line(win, lineColor = scaleColor, start = (tick5PosX, tickYStart), end = (tick5PosX, tickYEnd))
-tick6 = visual.Line(win, lineColor = scaleColor, start = (tick6PosX, tickYStart), end = (tick6PosX, tickYEnd))
-tick7 = visual.Line(win, lineColor = scaleColor, start = (tick7PosX, tickYStart), end = (tick7PosX, tickYEnd))
-
-tickLabelPosY = barPosY - scaleHeight
-tick1Label = visual.TextStim(win, text = '1', height = scaleHeight, color = scaleColor, pos = (tick1PosX, tickLabelPosY))
-tick2Label = visual.TextStim(win, text = '2', height = scaleHeight, color = scaleColor, pos = (tick2PosX, tickLabelPosY))
-tick3Label = visual.TextStim(win, text = '3', height = scaleHeight, color = scaleColor, pos = (tick3PosX, tickLabelPosY))
-tick4Label = visual.TextStim(win, text = '4', height = scaleHeight, color = scaleColor, pos = (tick4PosX, tickLabelPosY))
-tick5Label = visual.TextStim(win, text = '5', height = scaleHeight, color = scaleColor, pos = (tick5PosX, tickLabelPosY))
-tick6Label = visual.TextStim(win, text = '6', height = scaleHeight, color = scaleColor, pos = (tick6PosX, tickLabelPosY))
-tick7Label = visual.TextStim(win, text = '7', height = scaleHeight, color = scaleColor, pos = (tick7PosX, tickLabelPosY))
-
-def displayDifficultyScale():
-	leftArrow.draw()
-	rightArrow.draw()
-	bar.draw()
-	tick1.draw()
-	tick2.draw()
-	tick3.draw()
-	tick4.draw()
-	tick5.draw()
-	tick6.draw()
-	tick7.draw()
-	tick1Label.draw()
-	tick2Label.draw()
-	tick3Label.draw()
-	tick4Label.draw()
-	tick5Label.draw()
-	tick6Label.draw()
-	tick7Label.draw()
+difficultyScale = button.Scale(win, color = 'white', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY))
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -295,24 +232,16 @@ def playGame():
 	optionsBox.draw()
 	pauseButtonBox.draw()
 	pauseButtonText.draw()
-	displayDifficultyScale()
+	difficultyScale.draw()
 	if (not gamePaused):
 		moveBasket()
 		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
 			dropApple()
-	else:
-		if leftArrowButton.isClicked():
-			if difficultyLevel > 1:
-				difficultyLevel -= 1
-				dropIntervalLength = difficultyDict[difficultyLevel]['interval']
-				appleDropTime = difficultyDict[difficultyLevel]['drop time']
-				appleDecrement = gameAreaHeight/(frameRate*appleDropTime) 
-		if rightArrowButton.isClicked():
-			if difficultyLevel < 7:
-				difficultyLevel += 1
-				dropIntervalLength = difficultyDict[difficultyLevel]['interval']
-				appleDropTime = difficultyDict[difficultyLevel]['drop time']
-				appleDecrement = gameAreaHeight/(frameRate*appleDropTime) 
+	elif difficultyScale.hasLevelChanged():
+		difficultyLevel = difficultyScale.activeLevel
+		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+		appleDropTime = difficultyDict[difficultyLevel]['drop time']
+		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
 	apple.draw()
 	basket.draw()
 	bkgPauseOverlay.draw()
