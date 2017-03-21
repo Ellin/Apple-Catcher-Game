@@ -41,12 +41,12 @@ class Scale(object):
 		barWidth = self.width* 0.8
 		barLeftEdge = self.posX - barWidth/2.0
 		barRightEdge = self.posX + barWidth/2.0
-		self.bar = visual.Line(self.win, lineColor = self.scaleColor, start = (barLeftEdge, self.posY), end = (barRightEdge, self.posY))
+		self.bar = visual.Line(self.win, lineColor = self.scaleColor, start = (barLeftEdge, self.posY), end = (barRightEdge, self.posY), opacity = self.opacity)
 
 		# Create scale arrows
 		arrowWidth = self.width * 0.1
-		self.leftArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barLeftEdge - arrowWidth/2.0, self.posY), ori = -90)
-		self.rightArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barRightEdge + arrowWidth/2.0, self.posY), ori = 90)
+		self.leftArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barLeftEdge - arrowWidth/2.0, self.posY), ori = -90, opacity = self.opacity)
+		self.rightArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barRightEdge + arrowWidth/2.0, self.posY), ori = 90, opacity = self.opacity)
 		
 		# Make the scale arrows function as buttons
 		mouse = event.Mouse()
@@ -68,24 +68,24 @@ class Scale(object):
 		tick7PosX = barRightEdge
 
 		# Create tick bars
-		self.tick1 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick1PosX, tickYStart), end = (tick1PosX, tickYEnd))
-		self.tick2 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick2PosX, tickYStart), end = (tick2PosX, tickYEnd))
-		self.tick3 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick3PosX, tickYStart), end = (tick3PosX, tickYEnd))
-		self.tick4 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick4PosX, tickYStart), end = (tick4PosX, tickYEnd))
-		self.tick5 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick5PosX, tickYStart), end = (tick5PosX, tickYEnd))
-		self.tick6 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick6PosX, tickYStart), end = (tick6PosX, tickYEnd))
-		self.tick7 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick7PosX, tickYStart), end = (tick7PosX, tickYEnd))
+		self.tick1 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick1PosX, tickYStart), end = (tick1PosX, tickYEnd), opacity = self.opacity)
+		self.tick2 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick2PosX, tickYStart), end = (tick2PosX, tickYEnd), opacity = self.opacity)
+		self.tick3 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick3PosX, tickYStart), end = (tick3PosX, tickYEnd), opacity = self.opacity)
+		self.tick4 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick4PosX, tickYStart), end = (tick4PosX, tickYEnd), opacity = self.opacity)
+		self.tick5 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick5PosX, tickYStart), end = (tick5PosX, tickYEnd), opacity = self.opacity)
+		self.tick6 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick6PosX, tickYStart), end = (tick6PosX, tickYEnd), opacity = self.opacity)
+		self.tick7 = visual.Line(self.win, lineColor = self.scaleColor, start = (tick7PosX, tickYStart), end = (tick7PosX, tickYEnd), opacity = self.opacity)
 
 		tickLabelPosY = self.posY - self.height # Prevents scale labels from overlapping the scale
 
 		# Create tick labels
-		self.tick1Label = visual.TextStim(self.win, text = '1', height = self.height, color = self.scaleColor, pos = (tick1PosX, tickLabelPosY))
-		self.tick2Label = visual.TextStim(self.win, text = '2', height = self.height, color = self.scaleColor, pos = (tick2PosX, tickLabelPosY))
-		self.tick3Label = visual.TextStim(self.win, text = '3', height = self.height, color = self.scaleColor, pos = (tick3PosX, tickLabelPosY))
-		self.tick4Label = visual.TextStim(self.win, text = '4', height = self.height, color = self.scaleColor, pos = (tick4PosX, tickLabelPosY))
-		self.tick5Label = visual.TextStim(self.win, text = '5', height = self.height, color = self.scaleColor, pos = (tick5PosX, tickLabelPosY))
-		self.tick6Label = visual.TextStim(self.win, text = '6', height = self.height, color = self.scaleColor, pos = (tick6PosX, tickLabelPosY))
-		self.tick7Label = visual.TextStim(self.win, text = '7', height = self.height, color = self.scaleColor, pos = (tick7PosX, tickLabelPosY))
+		self.tick1Label = visual.TextStim(self.win, text = '1', height = self.height, color = self.scaleColor, pos = (tick1PosX, tickLabelPosY), opacity = self.opacity)
+		self.tick2Label = visual.TextStim(self.win, text = '2', height = self.height, color = self.scaleColor, pos = (tick2PosX, tickLabelPosY), opacity = self.opacity)
+		self.tick3Label = visual.TextStim(self.win, text = '3', height = self.height, color = self.scaleColor, pos = (tick3PosX, tickLabelPosY), opacity = self.opacity)
+		self.tick4Label = visual.TextStim(self.win, text = '4', height = self.height, color = self.scaleColor, pos = (tick4PosX, tickLabelPosY), opacity = self.opacity)
+		self.tick5Label = visual.TextStim(self.win, text = '5', height = self.height, color = self.scaleColor, pos = (tick5PosX, tickLabelPosY), opacity = self.opacity)
+		self.tick6Label = visual.TextStim(self.win, text = '6', height = self.height, color = self.scaleColor, pos = (tick6PosX, tickLabelPosY), opacity = self.opacity)
+		self.tick7Label = visual.TextStim(self.win, text = '7', height = self.height, color = self.scaleColor, pos = (tick7PosX, tickLabelPosY), opacity = self.opacity)
 
 		# Create tick dictionary
 		self.tickDict = {1: {'tick': self.tick1, 'label': self.tick1Label}, 2: {'tick': self.tick2, 'label': self.tick2Label}, 3: {'tick': self.tick3, 'label': self.tick3Label}, 4: {'tick': self.tick4, 'label': self.tick4Label}, 5: {'tick': self.tick5, 'label': self.tick5Label}, 6: {'tick': self.tick6, 'label': self.tick6Label}, 7: {'tick': self.tick7, 'label': self.tick7Label}}
@@ -143,10 +143,16 @@ class Scale(object):
 		self.tick5.opacity = newOpacity
 		self.tick6.opacity = newOpacity
 		self.tick7.opacity = newOpacity
-		self.tick1Label.opacity = newOpacity
-		self.tick2Label.opacity = newOpacity
-		self.tick3Label.opacity = newOpacity
-		self.tick4Label.opacity = newOpacity
-		self.tick5Label.opacity = newOpacity
-		self.tick6Label.opacity = newOpacity
-		self.tick7Label.opacity = newOpacity
+		self.setTextOpacity(self.tick1Label, newOpacity)
+		self.setTextOpacity(self.tick2Label, newOpacity)
+		self.setTextOpacity(self.tick3Label, newOpacity)
+		self.setTextOpacity(self.tick4Label, newOpacity)
+		self.setTextOpacity(self.tick5Label, newOpacity)
+		self.setTextOpacity(self.tick6Label, newOpacity)
+		self.setTextOpacity(self.tick7Label, newOpacity)
+
+	def setTextOpacity(self, textStim, newOpacity): # Need this to change text opacity b/c of stupid psychopy bug (see github.com/psychopy/psychopy/issues/1045)
+		originalText = textStim.text
+		textStim.setOpacity(newOpacity)
+		textStim.setText('') # Change the text to force psychopy to update the textstim's properties (opacity) instead of relying on a cached version
+		textStim.setText(originalText)

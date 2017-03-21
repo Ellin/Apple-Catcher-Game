@@ -15,6 +15,8 @@ participantDlg.addField('Experimenter Code:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
+condition = int(participantDlg.data[3])
+
 # Generate window
 win = visual.Window(fullscr = True, color = 'white', units = 'norm')
 
@@ -37,15 +39,13 @@ windowHeight = 2.0
 mouse = event.Mouse()
 
 # Timing (Unit = seconds)
-gamePlayLength = 60 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 120 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
 # Instruction screen
-instructionsC1 = 'Condition 1 instructions here'
-instructionsC2 = 'Condition 2 instructions here'
-instructionsC3 = 'Condition 3 instructions here'
-instructions = visual.TextStim(win, text = instructionsC1, color = 'black', height = 0.08)
+instructionsDict = {1: 'Condition 1 instructions here', 2: 'Condition 2 instructions here', 3: 'Condition 3 instructions here'}
+instructions = visual.TextStim(win, text = instructionsDict[condition], color = 'black', height = 0.08)
 startButtonBoxPosX = 0
 startButtonBoxPosY = -0.5
 startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
@@ -146,7 +146,7 @@ def displayInstructions():
 
 # Difficulty scale
 # parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
-difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY))
+difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
