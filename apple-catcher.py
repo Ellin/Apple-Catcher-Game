@@ -21,7 +21,7 @@ condition = int(participantDlg.data[3])
 win = visual.Window(fullscr = True, color = 'white', units = 'norm')
 
 # Get frame rate
-frameRate = win.getActualFrameRate()
+frameRate = win.getActualFrameRate() # Note: 59.9474475876 = buggy animation
 
 # Get window width and height (units = pixels)
 winX = win.size[0]
@@ -39,7 +39,7 @@ windowHeight = 2.0
 mouse = event.Mouse()
 
 # Timing (Unit = seconds)
-gamePlayLength = 120 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 5*60 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -186,39 +186,41 @@ def resetApple():
 		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 	apple.setPos([applePosX, applePosY])
 
-# Animate apples falling
-def dropApple():
-	global score
+def decrementApple():
 	global applePosY
-	appleEdges = getAppleEdges()
-	appleCaught = isAppleCaught()
-	if appleCaught:
-		score += 1
-		scoreDisplay.setText('Score: ' + str(score))
-		resetApple()
-	elif appleEdges['bottom'] - appleDecrement >= bottomGameAreaEdge: # If the apple bottom will stay above/on the ground with the next decrement, then continue to move the apple down
-		applePosY -= appleDecrement
-		apple.setPos([applePosX, applePosY])
-	else: # If the apple hit the ground or would be going through the ground if decremented further, then reset apple
-		resetApple()
+	applePosY -= appleDecrement
+	apple.setPos([applePosX, applePosY])
 
-# Specify when apples are caught
-# (An apple is considered "caught" if the apple touches the basket and it hasn't touched the ground)
 def isAppleCaught():
 	basketEdges = getBasketEdges()
 	appleEdges = getAppleEdges()
-
-	if (appleEdges['left'] <= basketEdges['right']) & (appleEdges['right'] >= basketEdges['left']): # If the apple is in the same horizontal space (column) as the basket...
-		if appleEdges['bottom'] - appleDecrement >= bottomGameAreaEdge: # If the apple bottom will stay above/on the ground with the next decrement, then check to see if apple is in the basket
-			if (appleEdges['bottom'] <= basketEdges['top']) & (appleEdges['bottom'] > basketEdges['bottom']): 
-				appleCaught = True
-			else:
-				appleCaught = False
-		else:
-			appleCaught = True # If the apple bottom will be going through the ground with the next decrement, then count as hit b/c it's currently above the basket (e.g. if the apple's decrement is larger than the basket, then it could skip over the basket in the next frame)
+	if (appleEdges['left'] <= basketEdges['right']) & (appleEdges['right'] >= basketEdges['left']) & (appleEdges['bottom'] <= basketEdges['top']): # If the apple is overlapping the same horizontal space (column) as the basket... & If the apple's bottom is touching or is below the top of the basket...  if the apple's decrement is larger than the basket, then it could skip over the basket and end up under the basket
+		return True
 	else:
-		appleCaught = False
-	return appleCaught
+		return False
+
+def isAppleTouchingGround():
+	appleEdges = getAppleEdges()
+	if appleEdges['bottom'] <= bottomGameAreaEdge:
+		return True
+	else:
+		return False
+
+# Animate apples falling
+def updateApple():
+# Update apple position:
+# if apple is currently touching the basket or touching the ground or will be fully past the ground with another decrement (i.e. appleposy will be below game bottom -  appleheight/2.0 so that apple will not be visible), then reset apple
+# else: decrement apple.
+	if isAppleCaught() or isAppleTouchingGround():
+		resetApple()
+	else:
+		decrementApple()
+
+def updateScore():
+	global score
+	if isAppleCaught():
+		score += 1
+		scoreDisplay.setText('Score: ' + str(score))
 
 def playGame():
 	global gamePaused
@@ -229,14 +231,11 @@ def playGame():
 	global appleDecrement
 
 	bkg.draw()
-	optionsBox.draw()
-	pauseButtonBox.draw()
-	pauseButtonText.draw()
-	difficultyScale.draw()
 	if (not gamePaused):
 		moveBasket()
 		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
-			dropApple()
+			updateApple()
+			updateScore()
 	elif difficultyScale.hasLevelChanged():
 		difficultyLevel = difficultyScale.activeLevel
 		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
@@ -244,6 +243,10 @@ def playGame():
 		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
 	apple.draw()
 	basket.draw()
+	optionsBox.draw()
+	pauseButtonBox.draw()
+	pauseButtonText.draw()
+	difficultyScale.draw()
 	bkgPauseOverlay.draw()
 	scoreDisplay.draw()
 
@@ -267,6 +270,15 @@ def resumeGame():
 	difficultyScale.setOpacity(0.5)
 	pauseButtonText.text = 'Pause'
 
+def playPractise(): 
+	bkg.draw()
+	optionsBox.draw()
+	moveBasket()
+	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+		updateApple()
+	apple.draw()
+	basket.draw()
+	scoreDisplay.draw()
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
