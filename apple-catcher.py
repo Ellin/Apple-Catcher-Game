@@ -2,7 +2,6 @@ from psychopy import core, event, gui, visual
 import pylab
 import button, random
 
-
 # Get participant's name, age, gender via a dialog box
 participantDlg = gui.Dlg()
 participantDlg.addField('ID:')
@@ -23,10 +22,6 @@ win = visual.Window(fullscr = True, color = 'white', units = 'norm')
 # Get frame rate
 frameRate = win.getActualFrameRate() # Note: 59.9474475876 = buggy animation
 
-# Get window width and height (units = pixels)
-winX = win.size[0]
-winY = win.size[1]
-
 # Window edges (units = norm)
 topWinEdge = 1.0
 bottomWinEdge = -1.0
@@ -37,20 +32,6 @@ windowHeight = 2.0
 
 # Get mouse
 mouse = event.Mouse()
-
-# Timing (Unit = seconds)
-gamePlayLength = 5*60 # Play time (excluding pauses) should max out at 10 minutes
-dropIntervalClock = core.Clock()
-pauseClock = core.Clock()
-
-# Instruction screen
-instructionsDict = {1: 'Condition 1 instructions here', 2: 'Condition 2 instructions here', 3: 'Condition 3 instructions here'}
-instructions = visual.TextStim(win, text = instructionsDict[condition], color = 'black', height = 0.08)
-startButtonBoxPosX = 0
-startButtonBoxPosY = -0.5
-startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
-startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
-startButton = button.Button(startButtonBox, mouse)
 
 # Specify game play area (units = norm)
 gameAreaWidth = windowWidth
@@ -68,6 +49,49 @@ optionsBoxHeight = windowHeight - gameAreaHeight
 optionsBoxPosX = 0
 optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
 optionsBox = visual.Rect(win, fillColor = 'grey', width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
+
+# CONDITION SPECIFIC INITIALIZATIONS
+if condition == 1:
+	instructionsText = 'Condition 1 instructions: In the actual game, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. Press start when you are ready to play.'
+	startButtonBoxPosX = 0
+	startButtonBoxPosY = -0.5
+	difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
+	# Pause button
+	pauseButtonBoxPosX = -0.75
+	pauseButtonBoxPosY = optionsBoxPosY
+	pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+	pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+	pauseButton = button.Button(pauseButtonBox, mouse)
+
+elif condition == 2:
+	instructionsText = 'Condition 2 instructions: Before you start the game, choose how difficult you want the game to be using the scale below. The practise was set at a difficulty of level 4. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. You will not be able to change the difficulty of the game once you start. Press start when you are ready to play.'
+	difficultyScale = button.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5))
+	startButtonBoxPosX = 0
+	startButtonBoxPosY = -0.75
+elif condition == 3:
+	instructionsText = 'Condition 3 instructions: In the actual game, the difficulty of the game (how quickly the apples drop) may change as you play. Press start when you are ready to play.'
+	startButtonBoxPosX = 0
+	startButtonBoxPosY = -0.5
+
+# Timing (Unit = seconds)
+practisePlayLength = 15 # Practise lasts 15 seconds
+gamePlayLength = 5*60 # Play time (excluding pauses) should max out at 10 minutes
+dropIntervalClock = core.Clock()
+pauseClock = core.Clock()
+
+#Practise Instruction Screen
+practiseInstructions = visual.TextStim(win, wrapWidth = 2, text = "Try to catch as many apples as you can by dragging the basket. Press next to practise doing this.", color = 'black', height = 0.08)
+practiseButtonBoxPosX = 0
+practiseButtonBoxPosY = -0.5
+practiseButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
+practiseButtonText = visual.TextStim(win, text = 'Next', color = 'black', height = 0.08, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
+practiseButton = button.Button(practiseButtonBox, mouse)
+
+# Instruction screen
+instructions = visual.TextStim(win, wrapWidth = 2, text = instructionsText, color = 'black', height = 0.08)
+startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
+startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
+startButton = button.Button(startButtonBox, mouse)
 
 # Background image parameters environment
 bkgimg = 'mtn.jpg'
@@ -91,12 +115,20 @@ appleImg = 'rock.png'
 apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight))
 
 # Apple animation settings 
-dropIntervalLength = 1 # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
+difficultyLevel = 4 # Initial setting
+difficultyDict = {
+	1: {'interval': 4, 'drop time': 8}, 
+	2: {'interval': 3, 'drop time': 6}, 
+	3: {'interval': 2, 'drop time': 4}, 
+	4: {'interval': 1, 'drop time': 2}, 
+	5: {'interval': 0.5, 'drop time': 1}, 
+	6: {'interval': 0.25, 'drop time': 0.5}, 
+	7: {'interval': 0, 'drop time': 0.25}}
+dropIntervalLength = difficultyDict[difficultyLevel]['interval'] # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
 # easiest = 4, easier = 3, easier = 2, middle = 1, harder = 0.5 harder = 0.25, hardest = 0
-appleDropTime = 2 # Unit = seconds. The time it takes for an apple to hit the ground.
+appleDropTime = difficultyDict[difficultyLevel]['drop time'] # Unit = seconds. The time it takes for an apple to hit the ground.
 # easiest = 8, easier = 6, easier = 4, middle = 2, harder = 1, harder = 0.5, hardest = 0.25
-difficultyLevel = 4
-difficultyDict = {1: {'interval': 4, 'drop time': 8}, 2: {'interval': 3, 'drop time': 6}, 3: {'interval': 2, 'drop time': 4}, 4: {'interval': 1, 'drop time': 2}, 5: {'interval': 0.5, 'drop time': 1}, 6: {'interval': 0.25, 'drop time': 0.5}, 7: {'interval': 0, 'drop time': 0.25}}
+
 appleDecrement = gameAreaHeight/(frameRate*appleDropTime) # The decrement is how much down the screen the apple should drop per frame
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
@@ -110,12 +142,6 @@ gamePaused = 0
 # Score display
 scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
 
-# Pause button (CONDITION 1 ONLY)
-pauseButtonBoxPosX = -0.75
-pauseButtonBoxPosY = optionsBoxPosY
-pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-pauseButton = button.Button(pauseButtonBox, mouse)
 
 # Condition 1
 ## Condition 1 can change difficulty levels at any time
@@ -127,26 +153,27 @@ pauseButton = button.Button(pauseButtonBox, mouse)
 # Condition 3
 ## Condition 3 is yoked to condition 1
 
-# Pause button (relevant only to condition 1)
-## if paused, stop basket/apple animations
-
-# Start button (relevant only to condition 1)
-## if condition 1,
-# Change difficulty level (i.e. speed of falling apples)
-
-# def pauseGame():
-# 	global gamePaused
-# 	while gamePaused:
-# 		print 'paused'
 
 def displayInstructions():
+	global difficultyLevel
+	global dropIntervalLength
+	global appleDropTime
+	global appleDecrement
 	instructions.draw()
+	if condition == 2:
+		if difficultyScale.hasLevelChanged():
+			difficultyLevel = difficultyScale.activeLevel
+			dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+			appleDropTime = difficultyDict[difficultyLevel]['drop time']
+			appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
+		difficultyScale.draw()
 	startButtonBox.draw()
 	startButtonText.draw()
 
-# Difficulty scale
-# parameters: scale colour, height, width, number of ticks, position, opacity, orientation?
-difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
+def displayPractiseScreen():
+	practiseInstructions.draw()
+	practiseButtonBox.draw()
+	practiseButtonText.draw()
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -222,7 +249,7 @@ def updateScore():
 		score += 1
 		scoreDisplay.setText('Score: ' + str(score))
 
-def playGame():
+def playCond1():
 	global gamePaused
 	global applePosY
 	global difficultyLevel
@@ -257,6 +284,18 @@ def playGame():
 		else:
 			resumeGame()
 
+def playCond2():
+	bkg.draw()
+	moveBasket()
+	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+		updateApple()
+		updateScore()
+	apple.draw()
+	basket.draw()
+	optionsBox.draw()
+	scoreDisplay.draw()
+
+
 def pauseGame():
 	bkgPauseOverlay.opacity = 0.5
 	difficultyScale.setOpacity(1)
@@ -270,18 +309,37 @@ def resumeGame():
 	difficultyScale.setOpacity(0.5)
 	pauseButtonText.text = 'Pause'
 
-def playPractise(): 
+def playPractise():
 	bkg.draw()
-	optionsBox.draw()
 	moveBasket()
 	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
 		updateApple()
+		updateScore()
 	apple.draw()
 	basket.draw()
+	optionsBox.draw()
 	scoreDisplay.draw()
+
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
+
+
+# while not practiseButton.isClicked():
+# 	displayPractiseScreen()
+# 	if event.getKeys(keyList = ['q','escape']):
+# 		core.quit()
+# 	mouse.clickReset()
+# 	win.flip()
+
+# resetApple() # Initialize apple
+# gamePlayClock = core.Clock() # Effectively starts the game play timer
+# while gamePlayClock.getTime() <= practisePlayLength: 
+# 	if event.getKeys(keyList = ['q','escape']):
+# 		core.quit()
+# 	playPractise()
+# 	mouse.clickReset()
+# 	win.flip()
 
 while not startButton.isClicked():
 	displayInstructions()
@@ -289,17 +347,28 @@ while not startButton.isClicked():
 		core.quit()
 	mouse.clickReset()
 	win.flip()
-#practiseScreen()
 
+score = 0
+scoreDisplay.setText('Score: ' + str(score))
 resetApple() # Initialize apple
 gamePlayClock = core.Clock() # Effectively starts the game play timer
 
-while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
-	if event.getKeys(keyList = ['q','escape']):
-		core.quit()
-	playGame()
-	mouse.clickReset()
-	win.flip()
+if condition == 1:
+	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
+		if event.getKeys(keyList = ['q','escape']):
+			core.quit()
+		playCond1()
+		mouse.clickReset()
+		win.flip()
+elif condition == 2:
+	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
+		if event.getKeys(keyList = ['q','escape']):
+			core.quit()
+		playCond2()
+		mouse.clickReset()
+		win.flip()
+elif condition == 3:
+	pass
 
 win.close()
 
