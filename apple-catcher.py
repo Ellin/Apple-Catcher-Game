@@ -1,4 +1,5 @@
 from psychopy import core, event, gui, visual
+import os, csv
 import pylab
 import button, random
 
@@ -55,6 +56,7 @@ if condition == 1:
 	instructionsText = 'Condition 1 instructions: In the actual game, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. Press start when you are ready to play.'
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.5
+	levelChangeLog = []
 	difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 	# Pause button
 	pauseButtonBoxPosX = -0.75
@@ -72,10 +74,12 @@ elif condition == 3:
 	instructionsText = 'Condition 3 instructions: In the actual game, the difficulty of the game (how quickly the apples drop) may change as you play. Press start when you are ready to play.'
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.5
+	levelChangeLog = []
+	i = 0 # Index for level change log
 
 # Timing (Unit = seconds)
 practisePlayLength = 15 # Practise lasts 15 seconds
-gamePlayLength = 5*60 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 15 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -295,6 +299,28 @@ def playCond2():
 	optionsBox.draw()
 	scoreDisplay.draw()
 
+def playCond3():
+	global i
+	global difficultyLevel
+	global dropIntervalLength
+	global appleDropTime
+	global appleDecrement
+	bkg.draw()
+	moveBasket()
+	if gamePlayClock.getTime() >= float(levelChangeLog[i]['Time']):
+		difficultyLevel = int(levelChangeLog[i]['Level'])
+		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+		appleDropTime = difficultyDict[difficultyLevel]['drop time']
+		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
+		if i+1 < len(levelChangeLog):
+			i += 1
+	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+		updateApple()
+		updateScore()
+	apple.draw()
+	basket.draw()
+	optionsBox.draw()
+	scoreDisplay.draw()
 
 def pauseGame():
 	bkgPauseOverlay.opacity = 0.5
@@ -305,6 +331,8 @@ def pauseGame():
 def resumeGame():
 	gamePlayClock.add(pauseClock.getTime()) # This effectively subtracts the pause time from the game play time
 	dropIntervalClock.add(pauseClock.getTime())
+	if levelChangeLog[len(levelChangeLog)-1]['Level'] != difficultyLevel: # If the difficulty level has changed, update the level change log
+		updateChangeLog()
 	bkgPauseOverlay.opacity = 0
 	difficultyScale.setOpacity(0.5)
 	pauseButtonText.text = 'Pause'
@@ -320,10 +348,31 @@ def playPractise():
 	optionsBox.draw()
 	scoreDisplay.draw()
 
+def updateChangeLog():
+	levelChangeLog.append({'Time': gamePlayClock.getTime(), 'Level': difficultyLevel})
+	print levelChangeLog
+
+def changeLogToCsv():
+	output_filename = 'test.csv'
+	output_filepath = os.path.join(os.getcwd(), output_filename)
+	column_labels = ["Time", "Level"]
+
+	with open(output_filepath, 'wb') as new_csvfile:
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		writer.writeheader()
+		for entry in levelChangeLog:
+			writer.writerow(entry)
+
+def csvToChangeLogDict():
+	input_filename = 'test.csv'
+	input_filepath = os.path.join(os.getcwd(), input_filename)
+	with open(input_filepath) as csvfile:
+		reader = csv.DictReader(csvfile)
+		for row in reader:
+			levelChangeLog.append(row)
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
-
 
 # while not practiseButton.isClicked():
 # 	displayPractiseScreen()
@@ -348,18 +397,26 @@ while not startButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
+if condition == 3:
+	csvToChangeLogDict()
+	if i+1 < len(levelChangeLog):
+			i += 1
+
 score = 0
 scoreDisplay.setText('Score: ' + str(score))
 resetApple() # Initialize apple
 gamePlayClock = core.Clock() # Effectively starts the game play timer
 
 if condition == 1:
+	levelChangeLog.append({'Time': 0, 'Level': difficultyLevel})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond1()
 		mouse.clickReset()
 		win.flip()
+	win.close()
+	changeLogToCsv()
 elif condition == 2:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -367,10 +424,18 @@ elif condition == 2:
 		playCond2()
 		mouse.clickReset()
 		win.flip()
+	win.close()
 elif condition == 3:
-	pass
+	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
+		if event.getKeys(keyList = ['q','escape']):
+			core.quit()
+		playCond3()
+		mouse.clickReset()
+		win.flip()
+	win.close()
 
-win.close()
+
+
 
 # pylab.plot(win.frameIntervals)
 # pylab.show()
