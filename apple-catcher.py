@@ -86,8 +86,8 @@ elif condition == 3:
 	i = 0 # Index for level change log
 
 # Timing (Unit = seconds)
-practisePlayLength = 15 # Practise lasts 15 seconds
-gamePlayLength = 15 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 2 # Practise lasts 15 seconds
+gamePlayLength = 61 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -107,6 +107,9 @@ startButton = tools.Button(startButtonBox, mouse)
 
 # End Screen
 endText = visual.TextStim(win, wrapWidth = 2, text = "This is the end of the study. Please get the experimenter.", color = 'black', height = 0.08)
+
+# Timer Textb
+timerStim = visual.TextStim(win, text = "", color = 'white', height = 0.1, pos = (0, 0.9))
 
 # Background image parameters environment
 bkgimg = 'tree-bkg.png'
@@ -184,6 +187,14 @@ def displayEndScreen():
 			core.quit()
 		endText.draw()
 		win.flip()
+
+def updateTimerText():
+	global timerStim
+	time = gamePlayClock.getTime()
+	minutes = int(time/60)
+	seconds = int(time)%60
+	timerText = str(minutes).zfill(2) + ':' + str(seconds).zfill(2) # create a string of characters representing the time
+	timerStim.text = timerText
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -273,6 +284,7 @@ def playCond1():
 		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
 			updateApple()
 			updateScore()
+		updateTimerText()
 	elif difficultyScale.hasLevelChanged():
 		difficultyLevel = difficultyScale.activeLevel
 		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
@@ -280,6 +292,7 @@ def playCond1():
 		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
 	apple.draw()
 	basket.draw()
+	timerStim.draw()
 	optionsBox.draw()
 	pauseButtonBox.draw()
 	pauseButtonText.draw()
@@ -302,6 +315,8 @@ def playCond2():
 		updateScore()
 	apple.draw()
 	basket.draw()
+	updateTimerText()
+	timerStim.draw()
 	optionsBox.draw()
 	scoreDisplay.draw()
 
@@ -330,6 +345,8 @@ def playCond3():
 		updateScore()
 	apple.draw()
 	basket.draw()
+	updateTimerText()
+	timerStim.draw()
 	optionsBox.draw()
 	scoreDisplay.draw()
 
