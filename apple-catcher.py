@@ -1,7 +1,11 @@
 from psychopy import core, event, gui, visual
-import os, csv
+import os, csv, random
 import pylab
-import button, random
+import tools
+
+# Condition 1: Can pause to change difficulty levels at any time
+# Condition 2: Can set difficulty level once at the beginning
+# Condition 3: Difficulty level changes are yoked to condition 1
 
 # Get participant's name, age, gender via a dialog box
 participantDlg = gui.Dlg()
@@ -15,13 +19,17 @@ participantDlg.addField('Experimenter Code:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
+participantID = participantDlg.data[0]
+gender = participantDlg.data[1]
+handedness = participantDlg.data[2]
 condition = int(participantDlg.data[3])
+participantDataDict = {'ID': participantID, 'Gender': gender, 'Handedness': handedness, 'Condition': condition}
 
 # Generate window
 win = visual.Window(fullscr = True, color = 'white', units = 'norm')
 
 # Get frame rate
-frameRate = win.getActualFrameRate() # Note: 59.9474475876 = buggy animation
+frameRate = 60
 
 # Window edges (units = norm)
 topWinEdge = 1.0
@@ -57,17 +65,17 @@ if condition == 1:
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.5
 	levelChangeLog = []
-	difficultyScale = button.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
+	difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 	# Pause button
 	pauseButtonBoxPosX = -0.75
 	pauseButtonBoxPosY = optionsBoxPosY
 	pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 	pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-	pauseButton = button.Button(pauseButtonBox, mouse)
+	pauseButton = tools.Button(pauseButtonBox, mouse)
 
 elif condition == 2:
 	instructionsText = 'Condition 2 instructions: Before you start the game, choose how difficult you want the game to be using the scale below. The practise was set at a difficulty of level 4. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. You will not be able to change the difficulty of the game once you start. Press start when you are ready to play.'
-	difficultyScale = button.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5))
+	difficultyScale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5))
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.75
 elif condition == 3:
@@ -89,16 +97,19 @@ practiseButtonBoxPosX = 0
 practiseButtonBoxPosY = -0.5
 practiseButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
 practiseButtonText = visual.TextStim(win, text = 'Next', color = 'black', height = 0.08, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
-practiseButton = button.Button(practiseButtonBox, mouse)
+practiseButton = tools.Button(practiseButtonBox, mouse)
 
 # Instruction screen
 instructions = visual.TextStim(win, wrapWidth = 2, text = instructionsText, color = 'black', height = 0.08)
 startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
 startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
-startButton = button.Button(startButtonBox, mouse)
+startButton = tools.Button(startButtonBox, mouse)
+
+# End Screen
+endText = visual.TextStim(win, wrapWidth = 2, text = "This is the end of the study. Please get the experimenter.", color = 'black', height = 0.08)
 
 # Background image parameters environment
-bkgimg = 'mtn.jpg'
+bkgimg = 'tree-bkg.png'
 bkgPosX = leftGameAreaEdge + gameAreaWidth/2.0
 bkgPosY = topGameAreaEdge - gameAreaHeight/2.0
 bkg = visual.ImageStim(win, image = bkgimg, size = (gameAreaWidth, gameAreaHeight), pos = (bkgPosX, bkgPosY), opacity = 1)
@@ -107,15 +118,15 @@ bkgPauseOverlay = visual.Rect(win, fillColor = 'white', width = gameAreaWidth, h
 # Basket parameters (norm units)
 basketWidth = 0.1
 basketHeight = 0.08
-basketImg = 'opal.png'
+basketImg = 'basket.png'
 basket = visual.ImageStim(win, image = basketImg, size = (basketWidth, basketHeight))
 basketPosX = gameAreaPosX # Basket starts at the center of the game area
 basketPosY = bottomGameAreaEdge + basketHeight/2.0 # The vertical position of the basket is fixed
 
 # Apple image parameters (norm units)
-appleWidth = 0.1
-appleHeight = appleWidth
-appleImg = 'rock.png'
+appleWidth = 0.05
+appleHeight = 0.1
+appleImg = 'apple.png'
 apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight))
 
 # Apple animation settings 
@@ -146,18 +157,6 @@ gamePaused = 0
 # Score display
 scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
 
-
-# Condition 1
-## Condition 1 can change difficulty levels at any time
-## Track difficulty level changes after every pause-start
-
-# Condition 2
-## Condition 2 can set difficulty level once at the beginning
-
-# Condition 3
-## Condition 3 is yoked to condition 1
-
-
 def displayInstructions():
 	global difficultyLevel
 	global dropIntervalLength
@@ -178,6 +177,13 @@ def displayPractiseScreen():
 	practiseInstructions.draw()
 	practiseButtonBox.draw()
 	practiseButtonText.draw()
+
+def displayEndScreen():
+	while True:
+		if event.getKeys(keyList = ['q','escape']):
+			core.quit()
+		endText.draw()
+		win.flip()
 
 def getBasketEdges():
 	basketTopEdge = basketPosY + basketHeight/2.0
@@ -301,19 +307,24 @@ def playCond2():
 
 def playCond3():
 	global i
+	global nextLevelChangeTime
 	global difficultyLevel
 	global dropIntervalLength
 	global appleDropTime
 	global appleDecrement
+
 	bkg.draw()
 	moveBasket()
-	if gamePlayClock.getTime() >= float(levelChangeLog[i]['Time']):
-		difficultyLevel = int(levelChangeLog[i]['Level'])
+	if gamePlayClock.getTime() >= nextLevelChangeTime: # Yoke difficulty level to that of condition 1
+		difficultyLevel = levelChangeLog[i]['Level']
 		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
 		appleDropTime = difficultyDict[difficultyLevel]['drop time']
 		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
 		if i+1 < len(levelChangeLog):
 			i += 1
+			nextLevelChangeTime = levelChangeLog[i]['Time']
+		else:
+			nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
 		updateApple()
 		updateScore()
@@ -350,10 +361,9 @@ def playPractise():
 
 def updateChangeLog():
 	levelChangeLog.append({'Time': gamePlayClock.getTime(), 'Level': difficultyLevel})
-	print levelChangeLog
 
 def changeLogToCsv():
-	output_filename = 'test.csv'
+	output_filename = 'changelog.csv'
 	output_filepath = os.path.join(os.getcwd(), output_filename)
 	column_labels = ["Time", "Level"]
 
@@ -364,31 +374,41 @@ def changeLogToCsv():
 			writer.writerow(entry)
 
 def csvToChangeLogDict():
-	input_filename = 'test.csv'
+	input_filename = 'changelog.csv'
 	input_filepath = os.path.join(os.getcwd(), input_filename)
 	with open(input_filepath) as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
-			levelChangeLog.append(row)
+			levelChangeLog.append({'Time': float(row['Time']), 'Level': int(row['Level'])})
+
+def participantDataToCsv():
+	output_filename = 'participant data.csv'
+	output_filepath = os.path.join(os.getcwd(), output_filename)
+	column_labels = ['ID', 'Gender', 'Handedness', 'Condition']
+
+	with open(output_filepath, 'wb') as new_csvfile:
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		writer.writeheader()
+		writer.writerow(participantDataDict)
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
 
-# while not practiseButton.isClicked():
-# 	displayPractiseScreen()
-# 	if event.getKeys(keyList = ['q','escape']):
-# 		core.quit()
-# 	mouse.clickReset()
-# 	win.flip()
+while not practiseButton.isClicked():
+	displayPractiseScreen()
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	mouse.clickReset()
+	win.flip()
 
-# resetApple() # Initialize apple
-# gamePlayClock = core.Clock() # Effectively starts the game play timer
-# while gamePlayClock.getTime() <= practisePlayLength: 
-# 	if event.getKeys(keyList = ['q','escape']):
-# 		core.quit()
-# 	playPractise()
-# 	mouse.clickReset()
-# 	win.flip()
+resetApple() # Initialize apple
+gamePlayClock = core.Clock() # Effectively starts the game play timer
+while gamePlayClock.getTime() <= practisePlayLength: 
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	playPractise()
+	mouse.clickReset()
+	win.flip()
 
 while not startButton.isClicked():
 	displayInstructions()
@@ -400,11 +420,15 @@ while not startButton.isClicked():
 if condition == 3:
 	csvToChangeLogDict()
 	if i+1 < len(levelChangeLog):
-			i += 1
+		i += 1
+		nextLevelChangeTime = levelChangeLog[i]['Time']
+	else:
+		nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
+
 
 score = 0
 scoreDisplay.setText('Score: ' + str(score))
-resetApple() # Initialize apple
+resetApple() # Initialize apple & drop interval timer
 gamePlayClock = core.Clock() # Effectively starts the game play timer
 
 if condition == 1:
@@ -415,8 +439,9 @@ if condition == 1:
 		playCond1()
 		mouse.clickReset()
 		win.flip()
-	win.close()
 	changeLogToCsv()
+	participantDataToCsv()
+	displayEndScreen()
 elif condition == 2:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -424,7 +449,8 @@ elif condition == 2:
 		playCond2()
 		mouse.clickReset()
 		win.flip()
-	win.close()
+	participantDataToCsv()
+	displayEndScreen()
 elif condition == 3:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -432,10 +458,9 @@ elif condition == 3:
 		playCond3()
 		mouse.clickReset()
 		win.flip()
-	win.close()
+	participantDataToCsv()
+	displayEndScreen()
 
-
-
-
+win.close()
 # pylab.plot(win.frameIntervals)
 # pylab.show()
