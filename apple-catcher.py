@@ -17,7 +17,7 @@ participantDlg.addField('Handedness:', choices = ['Right', 'Left'])
 participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Condition:')
 participantDlg.addText('                                                                                                               ')
-participantDlg.addField('Version:')
+participantDlg.addField('Version:', 0)
 participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
@@ -90,7 +90,7 @@ elif condition == 3:
 
 # Timing (Unit = seconds)
 practisePlayLength = 2 # Practise lasts 15 seconds
-gamePlayLength = 61 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 5 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -109,7 +109,47 @@ startButtonText = visual.TextStim(win, text = 'start', color = 'black', height =
 startButton = tools.Button(startButtonBox, mouse)
 
 # End Screen
-endText = visual.TextStim(win, wrapWidth = 2, text = "This is the end of the study. Please get the experimenter.", color = 'black', height = 0.08)
+endText = visual.TextStim(win, wrapWidth = 2, text = 'This is the end of the study. Please get the experimenter.', color = 'black', height = 0.08)
+
+# Probe Instruction Screen
+probeInstructions = visual.TextStim(win, wrapWidth = 1.8, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them. To adjust your answer, use the left or right arrow buttons.', color = 'black', height = 0.08, pos = (0, 0.5))
+probeStartButtonBoxPosX = 0
+probeStartButtonBoxPosY = 0
+probeStartButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
+probeStartButtonText = visual.TextStim(win, text = 'Next', color = 'black', height = 0.08, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
+probeStartButton = tools.Button(probeStartButtonBox, mouse)
+
+
+# Probe Screen
+q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.8))
+q2 = visual.TextStim(win, alignHoriz = 'left', text = 'How frustrated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
+q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0))
+q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How challenging did you find this study?', color = 'black', height = 0.08, pos = (-0.9, -0.4))
+q1Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.8))
+q2Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.4))
+q3Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0))
+q4Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, -0.4))
+q1Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all boring', color = 'black', height = 0.045, pos = (0.25, 0.65))
+q1Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, 0.65))
+q1Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely boring', color = 'black', height = 0.045, pos = (0.75, 0.65))
+q2Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all frustrating', color = 'black', height = 0.045, pos = (0.25, 0.25))
+q2Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, 0.25))
+q2Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely frustrating', color = 'black', height = 0.045, pos = (0.75, 0.25))
+q3Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all motivated', color = 'black', height = 0.045, pos = (0.25, -0.15))
+q3Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, -0.15))
+q3Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely motivated', color = 'black', height = 0.045, pos = (0.75, -0.15))
+q4Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all challenging', color = 'black', height = 0.045, pos = (0.25, -0.55))
+q4Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, -0.55))
+q4Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely challenging', color = 'black', height = 0.045, pos = (0.75, -0.55))
+q1Answer = 4
+q2Answer = 4
+q3Answer = 4
+q4Answer = 4
+probeSubmitButtonBoxPosX = 0
+probeSubmitButtonBoxPosY = -0.8
+probeSubmitButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeSubmitButtonBoxPosX, probeSubmitButtonBoxPosY))
+probeSubmitButtonText = visual.TextStim(win, text = 'Submit', color = 'black', height = 0.08, pos = (probeSubmitButtonBoxPosX, probeSubmitButtonBoxPosY))
+probeSubmitButton = tools.Button(probeSubmitButtonBox, mouse)
 
 # Timer Textb
 timerStim = visual.TextStim(win, text = "", color = 'white', height = 0.1, pos = (0, 0.9))
@@ -404,12 +444,54 @@ def csvToChangeLogDict():
 def participantDataToCsv():
 	output_filename = 'participant data.csv'
 	output_filepath = os.path.join(os.getcwd(), output_filename)
-	column_labels = ['ID', 'Gender', 'Handedness', 'Condition']
+	column_labels = ['ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4']
 
 	with open(output_filepath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
 		writer.writerow(participantDataDict)
+
+def displayProbeInstructions():
+	probeInstructions.draw()
+	probeStartButtonBox.draw()
+	probeStartButtonText.draw()
+
+def displayProbe():
+	global q1Answer
+	global q2Answer
+	global q3Answer
+	global q4Answer
+	q1.draw()
+	q2.draw()
+	q3.draw()
+	q4.draw()
+	q1Label1.draw()
+	q1Label2.draw()
+	q1Label3.draw()
+	q2Label1.draw()
+	q2Label2.draw()
+	q2Label3.draw()
+	q3Label1.draw()
+	q3Label2.draw()
+	q3Label3.draw()
+	q4Label1.draw()
+	q4Label2.draw()
+	q4Label3.draw()
+	if q1Scale.hasLevelChanged():
+		q1Answer = q1Scale.activeLevel
+	if q2Scale.hasLevelChanged():
+		q2Answer = q2Scale.activeLevel
+	if q3Scale.hasLevelChanged():
+		q3Answer = q3Scale.activeLevel
+	if q4Scale.hasLevelChanged():
+		q4Answer = q4Scale.activeLevel
+	q1Scale.draw()
+	q2Scale.draw()
+	q3Scale.draw()
+	q4Scale.draw()
+	probeSubmitButtonBox.draw()
+	probeSubmitButtonText.draw()
+
 
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
@@ -445,7 +527,6 @@ if condition == 3:
 	else:
 		nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 
-
 score = 0
 scoreDisplay.setText('Score: ' + str(score))
 resetApple() # Initialize apple & drop interval timer
@@ -460,8 +541,6 @@ if condition == 1:
 		mouse.clickReset()
 		win.flip()
 	changeLogToCsv()
-	participantDataToCsv()
-	displayEndScreen()
 elif condition == 2:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -469,8 +548,6 @@ elif condition == 2:
 		playCond2()
 		mouse.clickReset()
 		win.flip()
-	participantDataToCsv()
-	displayEndScreen()
 elif condition == 3:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -478,8 +555,24 @@ elif condition == 3:
 		playCond3()
 		mouse.clickReset()
 		win.flip()
-	participantDataToCsv()
-	displayEndScreen()
+
+while not probeStartButton.isClicked():
+	displayProbeInstructions()
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	mouse.clickReset()
+	win.flip()
+
+while not probeSubmitButton.isClicked():
+	displayProbe()
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	mouse.clickReset()
+	win.flip()
+
+participantDataDict.update({'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer})
+participantDataToCsv()
+displayEndScreen()
 
 win.close()
 # pylab.plot(win.frameIntervals)
