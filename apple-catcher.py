@@ -13,9 +13,11 @@ participantDlg.addField('ID:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Gender:', choices = ['Female', 'Male', 'Other'])
 participantDlg.addText('                                                                                                               ')
-participantDlg.addField('Handedness:', choices = ['Left', 'Right'])
+participantDlg.addField('Handedness:', choices = ['Right', 'Left'])
 participantDlg.addText('                                                                                                               ')
-participantDlg.addField('Experimenter Code:')
+participantDlg.addField('Condition:')
+participantDlg.addText('                                                                                                               ')
+participantDlg.addField('Version:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
@@ -23,6 +25,7 @@ participantID = participantDlg.data[0]
 gender = participantDlg.data[1]
 handedness = participantDlg.data[2]
 condition = int(participantDlg.data[3])
+yokeID = int(participantDlg.data[4]) # The participant ID that the game is yoked to (relevant only for condition 2)
 participantDataDict = {'ID': participantID, 'Gender': gender, 'Handedness': handedness, 'Condition': condition}
 
 # Generate window
