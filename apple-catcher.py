@@ -444,12 +444,14 @@ def csvToChangeLogDict():
 def participantDataToCsv():
 	output_filename = 'participant data.csv'
 	output_filepath = os.path.join(os.getcwd(), output_filename)
-	column_labels = ['ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4']
+	column_labels = ['ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Time', 'Level']
 
 	with open(output_filepath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
-		writer.writerow(participantDataDict)
+		for entry in levelChangeLog:
+			participantDataDict.update(entry)
+			writer.writerow(participantDataDict)
 
 def displayProbeInstructions():
 	probeInstructions.draw()
