@@ -18,7 +18,7 @@ participantDlg.addField('Handedness:', choices = ['Right', 'Left'])
 participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Condition:')
 participantDlg.addText('                                                                                                               ')
-participantDlg.addField('Version:', 0)
+participantDlg.addField('Version:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
@@ -26,7 +26,7 @@ participantID = participantDlg.data[0]
 gender = participantDlg.data[1]
 handedness = participantDlg.data[2]
 condition = int(participantDlg.data[3])
-yokeID = int(participantDlg.data[4]) # The participant ID that the game is yoked to (relevant only for condition 2)
+yokeID = participantDlg.data[4] # The participant ID that the game is yoked to (relevant only for condition 2)
 participantDataDict = {'ID': participantID, 'Gender': gender, 'Handedness': handedness, 'Condition': condition}
 
 # Generate window
@@ -441,8 +441,9 @@ def updateChangeLog():
 	nearMisses = 0
 
 def changeLogToCsv():
-	output_filename = 'changelog.csv'
-	output_filepath = os.path.join(os.getcwd(), output_filename)
+	output_filename = participantID + '.csv'
+	foldername = 'Level-Change-Logs'
+	output_filepath = os.path.join(os.getcwd(), foldername, output_filename)
 	column_labels = ['Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
 
 	with open(output_filepath, 'wb') as new_csvfile:
@@ -482,8 +483,9 @@ def playPractise():
 			resumeGame()
 
 def csvToChangeLogDict():
-	input_filename = 'changelog.csv'
-	input_filepath = os.path.join(os.getcwd(), input_filename)
+	input_filename = yokeID + '.csv'
+	foldername = 'Level-Change-Logs'
+	input_filepath = os.path.join(os.getcwd(), foldername, input_filename)
 	with open(input_filepath) as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
