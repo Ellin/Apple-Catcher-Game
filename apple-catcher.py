@@ -456,10 +456,6 @@ def changeLogToCsv():
 def playPractise():
 	global gamePaused
 	global applePosY
-	global difficultyLevel
-	global dropIntervalLength
-	global appleDropTime
-	global appleDecrement
 
 	bkg.draw()
 	if (not gamePaused):
@@ -468,10 +464,7 @@ def playPractise():
 			updateApple()
 			updateScore()
 	elif difficultyScale.hasLevelChanged():
-		difficultyLevel = difficultyScale.activeLevel
-		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
-		appleDropTime = difficultyDict[difficultyLevel]['drop time']
-		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
+		changeDifficulty(difficultyScale.activeLevel)
 	apple.draw()
 	basket.draw()
 	optionsBox.draw()
@@ -497,7 +490,7 @@ def csvToChangeLogDict():
 			levelChangeLog.append({'Game Timer': float(row['Game Timer']), 'Level': int(row['Level'])})
 
 def participantDataToCsv():
-	output_filename = 'participant data.csv'
+	output_filename = date + '_' + strftime('%H%M%S') + '_' + 'PID' + '-'+ participantID + '.csv'
 	output_filepath = os.path.join(os.getcwd(), output_filename)
 	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
 
@@ -574,7 +567,6 @@ while gamePlayClock.getTime() <= practisePlayLength or gamePaused:
 	win.flip()
 
 changeDifficulty(4)
-difficultyScale.setLevel(difficultyLevel)
 
 while not startButton.isClicked():
 	displayInstructions()
@@ -582,6 +574,8 @@ while not startButton.isClicked():
 		core.quit()
 	mouse.clickReset()
 	win.flip()
+
+difficultyScale.setLevel(difficultyLevel)
 
 if condition == 3:
 	csvToChangeLogDict()
