@@ -113,6 +113,13 @@ class Scale(object):
 				return True
 		return False
 
+	def setLevel(self, newLevel):
+		self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+		self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+		self.activeLevel = newLevel
+		self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+		self.tickDict[self.activeLevel]['label'].color = self.activeColor
+
 	def draw(self):
 		self.leftArrow.draw()
 		self.rightArrow.draw()

@@ -71,17 +71,10 @@ if condition == 1:
 	instructionsText = 'Condition 1 instructions: In the actual game, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. Press start when you are ready to play.'
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.5
-	difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
-	# Pause button
-	pauseButtonBoxPosX = -0.75
-	pauseButtonBoxPosY = optionsBoxPosY
-	pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-	pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-	pauseButton = tools.Button(pauseButtonBox, mouse)
 
 elif condition == 2:
 	instructionsText = 'Condition 2 instructions: Before you start the game, choose how difficult you want the game to be using the scale below. The practise was set at a difficulty of level 4. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. You will not be able to change the difficulty of the game once you start. Press start when you are ready to play.'
-	difficultyScale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5))
+	difficultyScaleC2Start = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5))
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.75
 elif condition == 3:
@@ -89,6 +82,15 @@ elif condition == 3:
 	startButtonBoxPosX = 0
 	startButtonBoxPosY = -0.5
 
+# Pause button
+pauseButtonBoxPosX = -0.75
+pauseButtonBoxPosY = optionsBoxPosY
+pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButton = tools.Button(pauseButtonBox, mouse)
+
+# Difficulty Scale
+difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 
 # Timing (Unit = seconds)
 practisePlayLength = 2 # Practise lasts 15 seconds
@@ -209,18 +211,11 @@ misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss
 scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
 
 def displayInstructions():
-	global difficultyLevel
-	global dropIntervalLength
-	global appleDropTime
-	global appleDecrement
 	instructions.draw()
 	if condition == 2:
-		if difficultyScale.hasLevelChanged():
-			difficultyLevel = difficultyScale.activeLevel
-			dropIntervalLength = difficultyDict[difficultyLevel]['interval']
-			appleDropTime = difficultyDict[difficultyLevel]['drop time']
-			appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
-		difficultyScale.draw()
+		if difficultyScaleC2Start.hasLevelChanged():
+			changeDifficulty(difficultyScaleC2Start.activeLevel)
+		difficultyScaleC2Start.draw()
 	startButtonBox.draw()
 	startButtonText.draw()
 
@@ -332,13 +327,19 @@ def updateScore():
 		score += 1
 		scoreDisplay.setText('Score: ' + str(score))
 
-def playCond1():
-	global gamePaused
-	global applePosY
+def changeDifficulty(newDifficultyLevel):
 	global difficultyLevel
 	global dropIntervalLength
 	global appleDropTime
 	global appleDecrement
+	difficultyLevel = newDifficultyLevel
+	dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+	appleDropTime = difficultyDict[difficultyLevel]['drop time']
+	appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
+
+def playCond1():
+	global gamePaused
+	global applePosY
 
 	bkg.draw()
 	if (not gamePaused):
@@ -348,10 +349,7 @@ def playCond1():
 			updateScore()
 		updateTimerText()
 	elif difficultyScale.hasLevelChanged():
-		difficultyLevel = difficultyScale.activeLevel
-		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
-		appleDropTime = difficultyDict[difficultyLevel]['drop time']
-		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
+		changeDifficulty(difficultyScale.activeLevel)
 	apple.draw()
 	basket.draw()
 	timerStim.draw()
@@ -380,25 +378,20 @@ def playCond2():
 	updateTimerText()
 	timerStim.draw()
 	optionsBox.draw()
+	difficultyScale.draw()
 	scoreDisplay.draw()
 
 def playCond3():
 	global i
 	global nextLevelChangeTime
-	global difficultyLevel
-	global dropIntervalLength
-	global appleDropTime
-	global appleDecrement
 
 	bkg.draw()
 	moveBasket()
 	if gamePlayClock.getTime() >= nextLevelChangeTime: 
 		updateChangeLog()
 		i += 1
-		difficultyLevel = levelChangeLog[i]['Level'] # Yoke difficulty level to that of condition 1
-		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
-		appleDropTime = difficultyDict[difficultyLevel]['drop time']
-		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
+		changeDifficulty(levelChangeLog[i]['Level']) # Yoke difficulty level to that of condition 1
+		difficultyScale.setLevel(difficultyLevel)
 
 		if i+1 < len(levelChangeLog):
 			nextLevelChangeTime = levelChangeLog[i+1]['Time']
@@ -412,6 +405,7 @@ def playCond3():
 	updateTimerText()
 	timerStim.draw()
 	optionsBox.draw()
+	difficultyScale.draw()
 	scoreDisplay.draw()
 
 ########################################### Start Condition 1 Functions
@@ -422,13 +416,15 @@ def pauseGame():
 	pauseClock.reset()
 
 def resumeGame():
+	global practiseMode
 	global i
 	gamePlayClock.add(pauseClock.getTime()) # This effectively subtracts the pause time from the game play time
 	dropIntervalClock.add(pauseClock.getTime())
-	if levelChangeLog[i]['Level'] != difficultyLevel: # If the difficulty level has changed, update the level change log
-		updateChangeLog()
-		levelChangeLog.append({'Time': gamePlayClock.getTime(), 'Level': difficultyLevel})
-		i += 1
+	if not practiseMode:
+		if levelChangeLog[i]['Level'] != difficultyLevel: # If the difficulty level has changed, update the level change log
+			updateChangeLog()
+			levelChangeLog.append({'Time': gamePlayClock.getTime(), 'Level': difficultyLevel})
+			i += 1
 	bkgPauseOverlay.opacity = 0
 	difficultyScale.setOpacity(0.5)
 	pauseButtonText.text = 'Pause'
@@ -456,15 +452,39 @@ def changeLogToCsv():
 ########################################### End Condition 1 Functions
 
 def playPractise():
+	global gamePaused
+	global applePosY
+	global difficultyLevel
+	global dropIntervalLength
+	global appleDropTime
+	global appleDecrement
+
 	bkg.draw()
-	moveBasket()
-	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
-		updateApple()
-		updateScore()
+	if (not gamePaused):
+		moveBasket()
+		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+			updateApple()
+			updateScore()
+	elif difficultyScale.hasLevelChanged():
+		difficultyLevel = difficultyScale.activeLevel
+		dropIntervalLength = difficultyDict[difficultyLevel]['interval']
+		appleDropTime = difficultyDict[difficultyLevel]['drop time']
+		appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
 	apple.draw()
 	basket.draw()
 	optionsBox.draw()
+	pauseButtonBox.draw()
+	pauseButtonText.draw()
+	difficultyScale.draw()
+	bkgPauseOverlay.draw()
 	scoreDisplay.draw()
+
+	if pauseButton.isClicked():
+		gamePaused = 1 - gamePaused # Flip pause status of game from 0 to 1 or vice versa
+		if gamePaused:
+			pauseGame()
+		else:
+			resumeGame()
 
 def csvToChangeLogDict():
 	input_filename = 'changelog.csv'
@@ -538,14 +558,18 @@ while not practiseButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
+practiseMode = 1
 resetApple() # Initialize apple
 gamePlayClock = core.Clock() # Effectively starts the game play timer
-while gamePlayClock.getTime() <= practisePlayLength: 
+while gamePlayClock.getTime() <= practisePlayLength or gamePaused: 
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
 	playPractise()
 	mouse.clickReset()
 	win.flip()
+
+changeDifficulty(4)
+difficultyScale.setLevel(difficultyLevel)
 
 while not startButton.isClicked():
 	displayInstructions()
@@ -561,6 +585,7 @@ if condition == 3:
 	else:
 		nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 
+practiseMode = 0
 score = 0
 scoreDisplay.setText('Score: ' + str(score))
 hits = 0
