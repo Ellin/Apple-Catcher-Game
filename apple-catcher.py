@@ -1,4 +1,5 @@
 from psychopy import core, event, gui, visual
+from time import strftime
 import os, csv, random
 import pylab
 import tools
@@ -394,7 +395,7 @@ def playCond3():
 		difficultyScale.setLevel(difficultyLevel)
 
 		if i+1 < len(levelChangeLog):
-			nextLevelChangeTime = levelChangeLog[i+1]['Time']
+			nextLevelChangeTime = levelChangeLog[i+1]['Game Timer']
 		else:
 			nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
@@ -423,7 +424,7 @@ def resumeGame():
 	if not practiseMode:
 		if levelChangeLog[i]['Level'] != difficultyLevel: # If the difficulty level has changed, update the level change log
 			updateChangeLog()
-			levelChangeLog.append({'Time': gamePlayClock.getTime(), 'Level': difficultyLevel})
+			levelChangeLog.append({'Game Timer': gamePlayClock.getTime(), 'Level': difficultyLevel})
 			i += 1
 	bkgPauseOverlay.opacity = 0
 	difficultyScale.setOpacity(0.5)
@@ -433,7 +434,8 @@ def updateChangeLog():
 	global hits
 	global misses
 	global nearMisses
-	levelChangeLog[i].update({'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
+	applesDropped = hits + misses + nearMisses
+	levelChangeLog[i].update({'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
 	hits = 0
 	misses = 0
 	nearMisses = 0
@@ -441,7 +443,7 @@ def updateChangeLog():
 def changeLogToCsv():
 	output_filename = 'changelog.csv'
 	output_filepath = os.path.join(os.getcwd(), output_filename)
-	column_labels = ['Time', 'Level', 'Hits', 'Misses', 'Near Misses']
+	column_labels = ['Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
 
 	with open(output_filepath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -492,12 +494,12 @@ def csvToChangeLogDict():
 	with open(input_filepath) as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
-			levelChangeLog.append({'Time': float(row['Time']), 'Level': int(row['Level'])})
+			levelChangeLog.append({'Game Timer': float(row['Game Timer']), 'Level': int(row['Level'])})
 
 def participantDataToCsv():
 	output_filename = 'participant data.csv'
 	output_filepath = os.path.join(os.getcwd(), output_filename)
-	column_labels = ['ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Time', 'Level', 'Hits', 'Misses', 'Near Misses']
+	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
 
 	with open(output_filepath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -551,6 +553,9 @@ def displayProbe():
 # START EXPERIMENT
 #win.setRecordFrameIntervals(True)
 
+date = strftime("%Y-%m-%d") # Get current date
+time = strftime("%H:%M") # Get current time (the time when the data in the dialog box is submitted)
+
 while not practiseButton.isClicked():
 	displayPractiseScreen()
 	if event.getKeys(keyList = ['q','escape']):
@@ -581,7 +586,7 @@ while not startButton.isClicked():
 if condition == 3:
 	csvToChangeLogDict()
 	if i+1 < len(levelChangeLog):
-		nextLevelChangeTime = levelChangeLog[i+1]['Time']
+		nextLevelChangeTime = levelChangeLog[i+1]['Game Timer']
 	else:
 		nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 
@@ -595,24 +600,24 @@ resetApple() # Initialize apple & drop interval timer
 gamePlayClock = core.Clock() # Effectively starts the game play timer
 
 if condition == 1:
-	levelChangeLog.append({'Time': 0, 'Level': difficultyLevel})
+	levelChangeLog.append({'Game Timer': 0, 'Level': difficultyLevel})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond1()
 		mouse.clickReset()
 		win.flip()
-	levelChangeLog[i].update({'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
+	updateChangeLog()
 	changeLogToCsv()
 elif condition == 2:
-	levelChangeLog.append({'Time': 0, 'Level': difficultyLevel})
+	levelChangeLog.append({'Game Timer': 0, 'Level': difficultyLevel})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond2()
 		mouse.clickReset()
 		win.flip()
-	levelChangeLog[i].update({'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
+	updateChangeLog()
 elif condition == 3:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -620,7 +625,7 @@ elif condition == 3:
 		playCond3()
 		mouse.clickReset()
 		win.flip()
-	levelChangeLog[i].update({'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
+	updateChangeLog()
 
 while not probeStartButton.isClicked():
 	displayProbeInstructions()
@@ -636,7 +641,7 @@ while not probeSubmitButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
-participantDataDict.update({'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer})
+participantDataDict.update({'Date': date, 'Time': time,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer})
 participantDataToCsv()
 displayEndScreen()
 
