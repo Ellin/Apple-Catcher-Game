@@ -493,12 +493,23 @@ def csvToChangeLogDict():
 
 def participantDataToCsv():
 	output_filename = date + '_' + strftime('%H%M%S') + '_' + 'PID' + '-'+ participantID + '.csv'
-	output_filepath = os.path.join(os.getcwd(), output_filename)
+	output_filepath = os.path.join(os.getcwd(), output_filename) # filepath for individual participant data files
+	master_filename = 'Master-Participant-Data.csv'
+	master_filepath = os.path.join(os.getcwd(), master_filename) # filepath for the master participant data file (holds data of all participants in 1 file)
 	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
 
-	with open(output_filepath, 'wb') as new_csvfile:
+	with open(output_filepath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
+		for entry in levelChangeLog:
+			participantDataDict.update(entry)
+			writer.writerow(participantDataDict)
+
+	masterFileExists = os.path.isfile(master_filepath)
+	with open(master_filepath, 'ab') as new_csvfile: # appends the same data as above to master participant data file
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		if not masterFileExists: # if master participant file does not already exist, create a new file with headers
+			writer.writeheader()
 		for entry in levelChangeLog:
 			participantDataDict.update(entry)
 			writer.writerow(participantDataDict)
