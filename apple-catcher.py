@@ -32,7 +32,7 @@ participantDataDict = {'ID': participantID, 'Gender': gender, 'Handedness': hand
 # Generate window
 win = visual.Window(fullscr = True, color = 'white', units = 'norm')
 
-# Get frame rate
+# Set frame rate
 frameRate = 60
 
 # Window edges (units = norm)
@@ -46,75 +46,49 @@ windowHeight = 2.0
 # Get mouse
 mouse = event.Mouse()
 
-# Specify game play area (units = norm)
-gameAreaWidth = windowWidth
-gameAreaHeight = windowHeight * (9.0/10.0) # The game play area is 9/10th the size of the window
-gameAreaPosX = 0 
-gameAreaPosY = (windowHeight - gameAreaHeight)/2.0
-topGameAreaEdge = gameAreaPosY + gameAreaHeight/2.0
-bottomGameAreaEdge = gameAreaPosY - gameAreaHeight/2.0
-leftGameAreaEdge = gameAreaPosX - gameAreaWidth/2.0
-rightGameAreaEdge = gameAreaPosX + gameAreaWidth/2.0
+# Initialize Level Data Log
+# The level data log is an array of dictionaries that will colect data (i.e. gamer timer, level, apples dropped, hits, misses, near misses) for each level that the participant plays
+levelDataLog = []
+i = 0 # Index for level data log
 
-# Specify game options box
-optionsBoxWidth = windowWidth
-optionsBoxHeight = windowHeight - gameAreaHeight
-optionsBoxPosX = 0
-optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
-optionsBox = visual.Rect(win, fillColor = 'grey', width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
+# Initialize game variables
+gamePaused = 0
+score = 0 # +1 point for every apple caught (counts for whole game, not per level)
+hits = 0 # Number of apples caught per level
+nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width range (1 basket width from the actual basket on each side)
+misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
 
-# Level Data Dict
-levelChangeLog = []
-i = 0 # Index for level change log
-
-# CONDITION SPECIFIC INITIALIZATIONS
-if condition == 1:
-	instructionsText = 'Condition 1 instructions: In the actual game, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. Press start when you are ready to play.'
-	startButtonBoxPosX = 0
-	startButtonBoxPosY = -0.5
-
-elif condition == 2:
-	instructionsText = 'Condition 2 instructions: Before you start the game, choose how difficult you want the game to be using the scale below. The practise was set at a difficulty of level 4. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. You will not be able to change the difficulty of the game once you start. Press start when you are ready to play.'
-	difficultyScaleC2Start = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5))
-	startButtonBoxPosX = 0
-	startButtonBoxPosY = -0.75
-elif condition == 3:
-	instructionsText = 'Condition 3 instructions: In the actual game, the difficulty of the game (how quickly the apples drop) may change as you play. Press start when you are ready to play.'
-	startButtonBoxPosX = 0
-	startButtonBoxPosY = -0.5
-
-# Pause button
-pauseButtonBoxPosX = -0.75
-pauseButtonBoxPosY = optionsBoxPosY
-pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
-pauseButton = tools.Button(pauseButtonBox, mouse)
-
-# Difficulty Scale
-difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
-
-# Timing (Unit = seconds)
-practisePlayLength = 2 # Practise lasts 15 seconds
+# Time variables (Unit = seconds)
+practisePlayLength = 15 # Practise play time (excluding pauses)
 gamePlayLength = 10 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
-#Practise Instruction Screen
-practiseInstructions = visual.TextStim(win, wrapWidth = 2, text = "Try to catch as many apples as you can by dragging the basket. Press next to practise doing this.", color = 'black', height = 0.08)
+#################################### Instruction / Text Display Screens #################################### 
+# Practise Trial Instruction Screen
+practiseInstructions = visual.TextStim(win, wrapWidth = 2, text = "Before you start the game, you will have about a minute to practise. Catch as many apples as you can by dragging the basket. Try changing the difficulty of the game by pressing pause to adjust the difficulty level using the scale in the bottom right corner of the screen. Press next to start the practise round.", color = 'black', height = 0.08)
 practiseButtonBoxPosX = 0
 practiseButtonBoxPosY = -0.5
 practiseButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
 practiseButtonText = visual.TextStim(win, text = 'Next', color = 'black', height = 0.08, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
 practiseButton = tools.Button(practiseButtonBox, mouse)
 
-# Instruction screen
-instructions = visual.TextStim(win, wrapWidth = 2, text = instructionsText, color = 'black', height = 0.08)
+# Game Instruction screen
+if condition == 1:
+	gameInstructionsText = 'Condition 1 instructions: You have finished the practise round. Like in the practise round, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. Press start when you are ready to play.'
+	startButtonBoxPosY = -0.5
+elif condition == 2:
+	gameInstructionsText = 'Condition 2 instructions: You have finished the practise round. Before you start the game, choose how difficult you want the game to be using the scale below. Unlike the practise round, you will *not* be able to change the difficulty of the game once you start. Press start when you are ready to play.'
+	startButtonBoxPosY = -0.75
+elif condition == 3:
+	gameInstructionsText = 'Condition 3 instructions: You have finished the practise round. Unlike the practise round, you will *not* be able to change the difficulty level of the game. The difficulty of the game may or may not change as you play, but you will not be able to choose when these changes happen. Press start when you are ready to play.'
+	startButtonBoxPosY = -0.5
+gameInstructions = visual.TextStim(win, wrapWidth = 2, text = gameInstructionsText, color = 'black', height = 0.08)
+difficultyScaleCond2 = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5)) # Difficulty scale for condition 2 where participants set their difficulty level for the game
+startButtonBoxPosX = 0
 startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
 startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
 startButton = tools.Button(startButtonBox, mouse)
-
-# End Screen
-endText = visual.TextStim(win, wrapWidth = 2, text = 'This is the end of the study. Please get the experimenter.', color = 'black', height = 0.08)
 
 # Probe Instruction Screen
 probeInstructions = visual.TextStim(win, wrapWidth = 1.8, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them. To adjust your answer, use the left or right arrow buttons.', color = 'black', height = 0.08, pos = (0, 0.5))
@@ -123,7 +97,6 @@ probeStartButtonBoxPosY = 0
 probeStartButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
 probeStartButtonText = visual.TextStim(win, text = 'Next', color = 'black', height = 0.08, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
 probeStartButton = tools.Button(probeStartButtonBox, mouse)
-
 
 # Probe Screen
 q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.8))
@@ -146,7 +119,7 @@ q3Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely motivated', 
 q4Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all challenging', color = 'black', height = 0.045, pos = (0.25, -0.55))
 q4Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, -0.55))
 q4Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely challenging', color = 'black', height = 0.045, pos = (0.75, -0.55))
-q1Answer = 4
+q1Answer = 4 # Default answer is 4 (middle of the scale)
 q2Answer = 4
 q3Answer = 4
 q4Answer = 4
@@ -156,8 +129,19 @@ probeSubmitButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey',
 probeSubmitButtonText = visual.TextStim(win, text = 'Submit', color = 'black', height = 0.08, pos = (probeSubmitButtonBoxPosX, probeSubmitButtonBoxPosY))
 probeSubmitButton = tools.Button(probeSubmitButtonBox, mouse)
 
-# Timer Textb
-timerStim = visual.TextStim(win, text = "", color = 'white', height = 0.1, pos = (0, 0.9))
+# End Screen
+endText = visual.TextStim(win, wrapWidth = 2, text = 'This is the end of the study. Please get the experimenter.', color = 'black', height = 0.08)
+#################################### #################################### #################################### 
+
+# Specify game play area (units = norm)
+gameAreaWidth = windowWidth
+gameAreaHeight = windowHeight * (9.0/10.0) # The game play area is 9/10th the size of the window
+gameAreaPosX = 0 
+gameAreaPosY = (windowHeight - gameAreaHeight)/2.0
+topGameAreaEdge = gameAreaPosY + gameAreaHeight/2.0
+bottomGameAreaEdge = gameAreaPosY - gameAreaHeight/2.0
+leftGameAreaEdge = gameAreaPosX - gameAreaWidth/2.0
+rightGameAreaEdge = gameAreaPosX + gameAreaWidth/2.0
 
 # Background image parameters environment
 bkgimg = 'tree-bkg.png'
@@ -182,41 +166,51 @@ apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight)
 
 # Apple animation settings 
 difficultyLevel = 4 # Initial setting
-difficultyDict = {
+difficultyDict = { # difficultyDict is a dictionary containing a dictionary of 'interval' & 'drop time' settings associated with each difficulty level
 	1: {'interval': 4, 'drop time': 8}, 
 	2: {'interval': 3, 'drop time': 6}, 
 	3: {'interval': 2, 'drop time': 4}, 
-	4: {'interval': 1, 'drop time': 2}, 
+	4: {'interval': 1, 'drop time': 2},  
 	5: {'interval': 0.5, 'drop time': 1}, 
 	6: {'interval': 0.25, 'drop time': 0.5}, 
 	7: {'interval': 0, 'drop time': 0.25}}
 dropIntervalLength = difficultyDict[difficultyLevel]['interval'] # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
-# easiest = 4, easier = 3, easier = 2, middle = 1, harder = 0.5 harder = 0.25, hardest = 0
 appleDropTime = difficultyDict[difficultyLevel]['drop time'] # Unit = seconds. The time it takes for an apple to hit the ground.
-# easiest = 8, easier = 6, easier = 4, middle = 2, harder = 1, harder = 0.5, hardest = 0.25
-
 appleDecrement = gameAreaHeight/(frameRate*appleDropTime) # The decrement is how much down the screen the apple should drop per frame
 appleStartPosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 appleStartPosY = topGameAreaEdge + appleHeight/2
 applePosX = appleStartPosX
 applePosY = appleStartPosY
 
-# Other game variables
-score = 0 # +1 point for every apple caught (counts for whole game, not per level)
-gamePaused = 0
-hits = 0 # Number of apples caught per level
-nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width range (1 basket width from the actual basket on each side)
-misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
+# Game options box (the area containing pause button, score, difficulty level scale)
+optionsBoxWidth = windowWidth
+optionsBoxHeight = windowHeight - gameAreaHeight
+optionsBoxPosX = 0
+optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
+optionsBox = visual.Rect(win, fillColor = 'grey', width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
+
+# Difficulty Scale
+difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 
 # Score display
-scoreDisplay = visual.TextStim(win, text = 'Score: ' + str(score), color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
+scoreDisplay = visual.TextStim(win, text = 'Score: 0', color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
 
-def displayInstructions():
-	instructions.draw()
+# Game Timer Visual
+timerStim = visual.TextStim(win, text = "", color = 'white', height = 0.1, pos = (0, 0.9))
+
+# Pause button
+pauseButtonBoxPosX = -0.75
+pauseButtonBoxPosY = optionsBoxPosY
+pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
+pauseButton = tools.Button(pauseButtonBox, mouse)
+
+def displayGameInstructions():
+	gameInstructions.draw()
 	if condition == 2:
-		if difficultyScaleC2Start.hasLevelChanged():
-			changeDifficulty(difficultyScaleC2Start.activeLevel)
-		difficultyScaleC2Start.draw()
+		if difficultyScaleCond2.hasLevelChanged():
+			changeDifficulty(difficultyScaleCond2.activeLevel)
+		difficultyScaleCond2.draw()
 	startButtonBox.draw()
 	startButtonText.draw()
 
@@ -268,21 +262,6 @@ def moveBasket():
 		basketPosX = rightGameAreaEdge - basketWidth/2.0
 	basket.setPos([basketPosX, basketPosY])
 
-def resetApple():
-	global applePosX
-	global applePosY
-	dropIntervalClock.reset()
-	applePosY = appleStartPosY
-	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
-	while abs(applePosX - basketPosX) < basketWidth + appleWidth/2.0: # Make sure the new apple drops at least a basket width + half the apple's width away from the participant's basket to force the participant to move at least half a basket width to catch the next apple
-		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
-	apple.setPos([applePosX, applePosY])
-
-def decrementApple():
-	global applePosY
-	applePosY -= appleDecrement
-	apple.setPos([applePosX, applePosY])
-
 def isAppleCaught():
 	basketEdges = getBasketEdges()
 	appleEdges = getAppleEdges()
@@ -291,6 +270,14 @@ def isAppleCaught():
 	else:
 		return False
 
+def isAppleTouchingGround():
+	appleEdges = getAppleEdges()
+	if appleEdges['bottom'] <= bottomGameAreaEdge:
+		return True
+	else:
+		return False
+
+# Checks for near misses & misses. Update these counts.
 def updateMisses():
 	global nearMisses
 	global misses
@@ -302,32 +289,42 @@ def updateMisses():
 		else:
 			misses +=1
 
-def isAppleTouchingGround():
-	appleEdges = getAppleEdges()
-	if appleEdges['bottom'] <= bottomGameAreaEdge:
-		return True
-	else:
-		return False
+# Update score & hit counts if apple has been caught.
+def updateScoreAndHits():
+	global score
+	global hits
+	if isAppleCaught():
+		score += 1
+		hits +=1
+		scoreDisplay.setText('Score: ' + str(score))
 
-# Animate apples falling
+# Reset apple position to top of screen. Also reset the drop interval clock.
+def resetApple():
+	global applePosX
+	global applePosY
+	dropIntervalClock.reset()
+	applePosY = appleStartPosY
+	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
+	while abs(applePosX - basketPosX) < basketWidth + appleWidth/2.0: # Make sure the new apple drops at least a basket width + half the apple's width away from the participant's basket to force the participant to move at least half a basket width to catch the next apple
+		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
+	apple.setPos([applePosX, applePosY])
+
+# Move the apple's position down
+def decrementApple():
+	global applePosY
+	applePosY -= appleDecrement
+	apple.setPos([applePosX, applePosY])
+
+# Checks for and updates hits/misses. Update apple position.
 def updateApple():
-# Update apple position:
-# if apple is currently touching the basket or touching the ground or will be fully past the ground with another decrement (i.e. appleposy will be below game bottom -  appleheight/2.0 so that apple will not be visible), then reset apple
-# else: decrement apple.
 	if isAppleCaught() or isAppleTouchingGround():
 		updateMisses()
+		updateScoreAndHits()
 		resetApple()
 	else:
 		decrementApple()
 
-def updateScore():
-	global score
-	global hits
-	if isAppleCaught():
-		hits +=1
-		score += 1
-		scoreDisplay.setText('Score: ' + str(score))
-
+# Change difficulty level of game (including how fast the apple falls and interval between apple drops)
 def changeDifficulty(newDifficultyLevel):
 	global difficultyLevel
 	global dropIntervalLength
@@ -338,78 +335,6 @@ def changeDifficulty(newDifficultyLevel):
 	appleDropTime = difficultyDict[difficultyLevel]['drop time']
 	appleDecrement = gameAreaHeight/(frameRate*appleDropTime)
 
-def playCond1():
-	global gamePaused
-	global applePosY
-
-	bkg.draw()
-	if (not gamePaused):
-		moveBasket()
-		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
-			updateApple()
-			updateScore()
-		updateTimerText()
-	elif difficultyScale.hasLevelChanged():
-		changeDifficulty(difficultyScale.activeLevel)
-	apple.draw()
-	basket.draw()
-	timerStim.draw()
-	optionsBox.draw()
-	pauseButtonBox.draw()
-	pauseButtonText.draw()
-	difficultyScale.draw()
-	bkgPauseOverlay.draw()
-	scoreDisplay.draw()
-
-	if pauseButton.isClicked():
-		gamePaused = 1 - gamePaused # Flip pause status of game from 0 to 1 or vice versa
-		if gamePaused:
-			pauseGame()
-		else:
-			resumeGame()
-
-def playCond2():
-	bkg.draw()
-	moveBasket()
-	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
-		updateApple()
-		updateScore()
-	apple.draw()
-	basket.draw()
-	updateTimerText()
-	timerStim.draw()
-	optionsBox.draw()
-	difficultyScale.draw()
-	scoreDisplay.draw()
-
-def playCond3():
-	global i
-	global nextLevelChangeTime
-
-	bkg.draw()
-	moveBasket()
-	if gamePlayClock.getTime() >= nextLevelChangeTime: 
-		updateChangeLog()
-		i += 1
-		changeDifficulty(levelChangeLog[i]['Level']) # Yoke difficulty level to that of condition 1
-		difficultyScale.setLevel(difficultyLevel)
-
-		if i+1 < len(levelChangeLog):
-			nextLevelChangeTime = levelChangeLog[i+1]['Game Timer']
-		else:
-			nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
-	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
-		updateApple()
-		updateScore()
-	apple.draw()
-	basket.draw()
-	updateTimerText()
-	timerStim.draw()
-	optionsBox.draw()
-	difficultyScale.draw()
-	scoreDisplay.draw()
-
-########################################### Start Condition 1 Functions
 def pauseGame():
 	bkgPauseOverlay.opacity = 0.5
 	difficultyScale.setOpacity(1)
@@ -417,63 +342,42 @@ def pauseGame():
 	pauseClock.reset()
 
 def resumeGame():
-	global practiseMode
-	global i
 	gamePlayClock.add(pauseClock.getTime()) # This effectively subtracts the pause time from the game play time
 	dropIntervalClock.add(pauseClock.getTime())
-	if not practiseMode:
-		if levelChangeLog[i]['Level'] != difficultyLevel: # If the difficulty level has changed, update the level change log
-			updateChangeLog()
-			levelChangeLog.append({'Game Timer': gamePlayClock.getTime(), 'Level': difficultyLevel})
-			i += 1
 	bkgPauseOverlay.opacity = 0
 	difficultyScale.setOpacity(0.5)
 	pauseButtonText.text = 'Pause'
 
-def updateChangeLog():
+# Update the levelDataLog with the number of apples dropped, caught (hit), missed, and near-missed during the level. Then reset the apple catch data variables.
+def logAppleCatchData():
 	global hits
 	global misses
 	global nearMisses
 	applesDropped = hits + misses + nearMisses
-	levelChangeLog[i].update({'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
+	levelDataLog[i].update({'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
 	hits = 0
 	misses = 0
 	nearMisses = 0
 
-def changeLogToCsv():
-	output_filename = participantID + '.csv'
-	foldername = 'Level-Change-Logs'
-	output_filepath = os.path.join(os.getcwd(), foldername, output_filename)
-	column_labels = ['Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
+# Draw game graphics common to practise trial and all conditions
+def drawCommonGameGraphics():
+	bkg.draw()
+	apple.draw()
+	basket.draw()
+	optionsBox.draw()
+	difficultyScale.draw()
+	scoreDisplay.draw()
 
-	with open(output_filepath, 'wb') as new_csvfile:
-		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
-		writer.writeheader()
-		for entry in levelChangeLog:
-			writer.writerow(entry)
-
-########################################### End Condition 1 Functions
-
+# Play practise trial for participant
 def playPractise():
 	global gamePaused
-	global applePosY
 
-	bkg.draw()
 	if (not gamePaused):
 		moveBasket()
 		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
 			updateApple()
-			updateScore()
 	elif difficultyScale.hasLevelChanged():
 		changeDifficulty(difficultyScale.activeLevel)
-	apple.draw()
-	basket.draw()
-	optionsBox.draw()
-	pauseButtonBox.draw()
-	pauseButtonText.draw()
-	difficultyScale.draw()
-	bkgPauseOverlay.draw()
-	scoreDisplay.draw()
 
 	if pauseButton.isClicked():
 		gamePaused = 1 - gamePaused # Flip pause status of game from 0 to 1 or vice versa
@@ -482,18 +386,100 @@ def playPractise():
 		else:
 			resumeGame()
 
-def csvToChangeLogDict():
+	drawCommonGameGraphics()
+	pauseButtonBox.draw()
+	pauseButtonText.draw()
+	bkgPauseOverlay.draw()
+
+def playCond1():
+	global gamePaused
+	global i
+
+	if (not gamePaused):
+		moveBasket()
+		if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+			updateApple()
+		updateTimerText()
+	elif difficultyScale.hasLevelChanged():
+		changeDifficulty(difficultyScale.activeLevel)
+
+	if pauseButton.isClicked():
+		gamePaused = 1 - gamePaused # Flip pause status of game from 0 to 1 or vice versa
+		if gamePaused:
+			pauseGame()
+		else:
+			resumeGame()
+			if levelDataLog[i]['Level'] != difficultyLevel: # Relevant only to Condition 1: If the difficulty level has changed upon resume, update the level data log.
+				logAppleCatchData()
+				levelDataLog.append({'Game Timer': gamePlayClock.getTime(), 'Level': difficultyLevel})
+				i += 1
+
+	drawCommonGameGraphics()
+	timerStim.draw()
+	pauseButtonBox.draw()
+	pauseButtonText.draw()
+	bkgPauseOverlay.draw()
+
+def playCond2():
+	moveBasket()
+	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+		updateApple()
+
+	updateTimerText()
+	drawCommonGameGraphics()
+	timerStim.draw()
+
+def playCond3():
+	global i
+	global nextLevelChangeTime
+
+	moveBasket()
+	if gamePlayClock.getTime() >= nextLevelChangeTime: 
+		logAppleCatchData()
+		i += 1
+		changeDifficulty(levelDataLog[i]['Level']) # Yoke difficulty level to that of condition 1
+		difficultyScale.setLevel(difficultyLevel)
+		if i+1 < len(levelDataLog):
+			nextLevelChangeTime = levelDataLog[i+1]['Game Timer']
+		else:
+			nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
+
+	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+		updateApple()
+
+	updateTimerText()
+	drawCommonGameGraphics()
+	timerStim.draw()
+
+# Create a csv file containing level change data. Used only in Condition 1 to save the participant's level changes to a csv (which will later be used for yoking in Condition 3).
+def createChangeLogCsv():
+	output_filename = participantID + '.csv'
+	foldername = 'Condition-1_Level-Change-Logs'
+	output_filepath = os.path.join(os.getcwd(), foldername, output_filename)
+	column_labels = ['Game Timer', 'Level']
+
+	with open(output_filepath, 'wb') as new_csvfile:
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		writer.writeheader()
+		for entry in levelDataLog:
+			levelChangeDict = {'Game Timer': entry['Game Timer'], 'Level': entry['Level']} # Extract just the 'Game Timer' and 'Level' data from levelDataLog
+			writer.writerow(levelChangeDict)
+
+# Converts csv containing level changes (from participant in Condition 1) to an array of dictionaries. Used only in Condition 3 for yoking.
+def changeLogCsvToDict():
 	input_filename = yokeID + '.csv'
-	foldername = 'Level-Change-Logs'
+	foldername = 'Condition-1_Level-Change-Logs'
 	input_filepath = os.path.join(os.getcwd(), foldername, input_filename)
 	with open(input_filepath) as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
-			levelChangeLog.append({'Game Timer': float(row['Game Timer']), 'Level': int(row['Level'])})
+			levelDataLog.append({'Game Timer': float(row['Game Timer']), 'Level': int(row['Level'])})
 
+# Write participant data to two csv files (individual participant file and master file with data of all participants)
 def participantDataToCsv():
 	output_filename = date + '_' + strftime('%H%M%S') + '_' + 'PID' + '-'+ participantID + '.csv'
-	output_filepath = os.path.join(os.getcwd(), output_filename) # filepath for individual participant data files
+	output_foldername = 'Individual-Participant-Data'
+	output_filepath = os.path.join(os.getcwd(), output_foldername, output_filename) # filepath for individual participant data files
 	master_filename = 'Master-Participant-Data.csv'
 	master_filepath = os.path.join(os.getcwd(), master_filename) # filepath for the master participant data file (holds data of all participants in 1 file)
 	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
@@ -501,16 +487,16 @@ def participantDataToCsv():
 	with open(output_filepath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
-		for entry in levelChangeLog:
+		for entry in levelDataLog:
 			participantDataDict.update(entry)
 			writer.writerow(participantDataDict)
 
-	masterFileExists = os.path.isfile(master_filepath)
+	masterFileExists = os.path.isfile(master_filepath) # Boolean variable for whether the master file already exists
 	with open(master_filepath, 'ab') as new_csvfile: # appends the same data as above to master participant data file
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
-		if not masterFileExists: # if master participant file does not already exist, create a new file with headers
+		if not masterFileExists: # if master participant file does not already exist, create a new file with headers (otherwise, do nothing & just append data to existing file)
 			writer.writeheader()
-		for entry in levelChangeLog:
+		for entry in levelDataLog:
 			participantDataDict.update(entry)
 			writer.writerow(participantDataDict)
 
@@ -555,13 +541,14 @@ def displayProbe():
 	probeSubmitButtonBox.draw()
 	probeSubmitButtonText.draw()
 
-
-# START EXPERIMENT
+#################################### START EXPERIMENT ####################################
 #win.setRecordFrameIntervals(True)
 
+# Get date & time
 date = strftime("%Y-%m-%d") # Get current date
 time = strftime("%H:%M") # Get current time (the time when the data in the dialog box is submitted)
 
+# Display instruction screen for the practise trial
 while not practiseButton.isClicked():
 	displayPractiseScreen()
 	if event.getKeys(keyList = ['q','escape']):
@@ -569,9 +556,11 @@ while not practiseButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
-practiseMode = 1
-resetApple() # Initialize apple
+# Initializations for practise trial
+resetApple() # Initialize apple (drop interval timer is also reset here)
 gamePlayClock = core.Clock() # Effectively starts the game play timer
+
+# Run practise trial
 while gamePlayClock.getTime() <= practisePlayLength or gamePaused: 
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
@@ -579,52 +568,54 @@ while gamePlayClock.getTime() <= practisePlayLength or gamePaused:
 	mouse.clickReset()
 	win.flip()
 
-changeDifficulty(4)
-
+# Display instruction screen for the actual game
 while not startButton.isClicked():
-	displayInstructions()
+	displayGameInstructions()
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
 	mouse.clickReset()
 	win.flip()
 
-difficultyScale.setLevel(difficultyLevel)
+# If Condition 1 or 3, reset difficulty level of game back to 4 (in Condition 2, participant chooses the difficulty level via a scale in the game instructions screen)
+if condition == 1 or condition == 3:
+	changeDifficulty(4)
 
+# If Condition 3, get the time that the next level change should occur
 if condition == 3:
-	csvToChangeLogDict()
-	if i+1 < len(levelChangeLog):
-		nextLevelChangeTime = levelChangeLog[i+1]['Game Timer']
+	changeLogCsvToDict()
+	if i+1 < len(levelDataLog):
+		nextLevelChangeTime = levelDataLog[i+1]['Game Timer']
 	else:
 		nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 
-practiseMode = 0
+# Reset game variables (since the trial round has finished and the real game will be starting)
 score = 0
-scoreDisplay.setText('Score: ' + str(score))
 hits = 0
 misses = 0
 nearMisses = 0
-resetApple() # Initialize apple & drop interval timer
+scoreDisplay.setText('Score: ' + str(score))
+difficultyScale.setLevel(difficultyLevel) # Visually set active level of difficulty scale to proper difficulty level
+resetApple() # Initialize apple (drop interval timer is also reset here)
 gamePlayClock = core.Clock() # Effectively starts the game play timer
 
+# Run the appropriate game for the condition
 if condition == 1:
-	levelChangeLog.append({'Game Timer': 0, 'Level': difficultyLevel})
+	levelDataLog.append({'Game Timer': 0, 'Level': difficultyLevel})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond1()
 		mouse.clickReset()
 		win.flip()
-	updateChangeLog()
-	changeLogToCsv()
+	createChangeLogCsv()
 elif condition == 2:
-	levelChangeLog.append({'Game Timer': 0, 'Level': difficultyLevel})
+	levelDataLog.append({'Game Timer': 0, 'Level': difficultyLevel})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond2()
 		mouse.clickReset()
 		win.flip()
-	updateChangeLog()
 elif condition == 3:
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
@@ -632,8 +623,9 @@ elif condition == 3:
 		playCond3()
 		mouse.clickReset()
 		win.flip()
-	updateChangeLog()
+logAppleCatchData()
 
+# Display instruction screen for the probe
 while not probeStartButton.isClicked():
 	displayProbeInstructions()
 	if event.getKeys(keyList = ['q','escape']):
@@ -641,6 +633,7 @@ while not probeStartButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
+# Display screen containing the probes
 while not probeSubmitButton.isClicked():
 	displayProbe()
 	if event.getKeys(keyList = ['q','escape']):
@@ -649,7 +642,11 @@ while not probeSubmitButton.isClicked():
 	win.flip()
 
 participantDataDict.update({'Date': date, 'Time': time,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer})
+
+# Write all participant data collected over the duration of the experiment to csv files
 participantDataToCsv()
+
+# Display end screen
 displayEndScreen()
 
 win.close()
