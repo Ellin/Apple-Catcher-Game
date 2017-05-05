@@ -453,12 +453,16 @@ def playCond3():
 
 # Create a csv file containing level change data. Used only in Condition 1 to save the participant's level changes to a csv (which will later be used for yoking in Condition 3).
 def createChangeLogCsv():
-	output_filename = participantID + '.csv'
-	foldername = 'Condition-1_Level-Change-Logs'
-	output_filepath = os.path.join(os.getcwd(), foldername, output_filename)
-	column_labels = ['Game Timer', 'Level']
+	outputFileName = participantID + '.csv'
+	outputFolderName = 'Condition-1_Level-Change-Logs'
+	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
 
-	with open(output_filepath, 'wb') as new_csvfile:
+	# If the output folder does not exist, create it
+	if not os.path.exists(outputFolderName):
+		os.makedirs(outputFolderName)
+
+	column_labels = ['Game Timer', 'Level']
+	with open(outputFilePath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
 		for entry in levelDataLog:
@@ -467,32 +471,38 @@ def createChangeLogCsv():
 
 # Converts csv containing level changes (from participant in Condition 1) to an array of dictionaries. Used only in Condition 3 for yoking.
 def changeLogCsvToDict():
-	input_filename = yokeID + '.csv'
-	foldername = 'Condition-1_Level-Change-Logs'
-	input_filepath = os.path.join(os.getcwd(), foldername, input_filename)
-	with open(input_filepath) as csvfile:
+	inputFileName = yokeID + '.csv'
+	inputFolderName = 'Condition-1_Level-Change-Logs'
+	inputFilePath = os.path.join(os.getcwd(), inputFolderName, inputFileName)
+	with open(inputFilePath) as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
 			levelDataLog.append({'Game Timer': float(row['Game Timer']), 'Level': int(row['Level'])})
 
 # Write participant data to two csv files (individual participant file and master file with data of all participants)
 def participantDataToCsv():
-	output_filename = date + '_' + strftime('%H%M%S') + '_' + 'PID' + '-'+ participantID + '.csv'
-	output_foldername = 'Individual-Participant-Data'
-	output_filepath = os.path.join(os.getcwd(), output_foldername, output_filename) # filepath for individual participant data files
-	master_filename = 'Master-Participant-Data.csv'
-	master_filepath = os.path.join(os.getcwd(), master_filename) # filepath for the master participant data file (holds data of all participants in 1 file)
+	outputFileName = date + '_' + strftime('%H%M%S') + '_' + 'PID' + '-'+ participantID + '.csv'
+	outputFolderName = 'Individual-Participant-Data'
+	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName) # filepath for individual participant data files
+
+	# If the output folder does not exist, create it
+	if not os.path.exists(outputFolderName):
+		os.makedirs(outputFolderName)
+
+	masterFileName = 'Master-Participant-Data.csv'
+	masterFilePath = os.path.join(os.getcwd(), masterFileName) # filepath for the master participant data file (holds data of all participants in 1 file)
+
 	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
 
-	with open(output_filepath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
+	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
 		for entry in levelDataLog:
 			participantDataDict.update(entry)
 			writer.writerow(participantDataDict)
 
-	masterFileExists = os.path.isfile(master_filepath) # Boolean variable for whether the master file already exists
-	with open(master_filepath, 'ab') as new_csvfile: # appends the same data as above to master participant data file
+	masterFileExists = os.path.isfile(masterFilePath) # Boolean variable for whether the master file already exists
+	with open(masterFilePath, 'ab') as new_csvfile: # appends the same data as above to master participant data file
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		if not masterFileExists: # if master participant file does not already exist, create a new file with headers (otherwise, do nothing & just append data to existing file)
 			writer.writeheader()
