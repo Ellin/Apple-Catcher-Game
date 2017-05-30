@@ -47,7 +47,7 @@ windowHeight = 2.0
 mouse = event.Mouse()
 
 # Initialize Level Data Log
-# The level data log is an array of dictionaries that will colect data (i.e. gamer timer, level, apples dropped, hits, misses, near misses) for each level that the participant plays
+# The level data log is an array of dictionaries that will collect data (i.e. gamer timer, level, apple drop time, drop interval length, apples dropped, hits, misses, near misses, % hits, % misses, % near misses) for each level that the participant plays
 levelDataLog = []
 i = 0 # Index for level data log
 
@@ -59,8 +59,8 @@ nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width ra
 misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
 
 # Time variables (Unit = seconds)
-practisePlayLength = 15 # Practise play time (excluding pauses)
-gamePlayLength = 10 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 5 # Practise play time (excluding pauses)
+gamePlayLength = 20 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -354,7 +354,15 @@ def logAppleCatchData():
 	global misses
 	global nearMisses
 	applesDropped = hits + misses + nearMisses
-	levelDataLog[i].update({'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses})
+	if applesDropped > 0:
+		percentHits = (hits/float(applesDropped))*100
+		percentMisses = (misses/float(applesDropped))*100
+		percentNearMisses = (nearMisses/float(applesDropped))*100
+	else:
+		percentHits = 0
+		percentMisses = 0
+		percentNearMisses = 0
+	levelDataLog[i].update({'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses, '% Hits': percentHits, '% Misses': percentMisses, '% Near Misses': percentNearMisses})
 	hits = 0
 	misses = 0
 	nearMisses = 0
@@ -411,7 +419,7 @@ def playCond1():
 			resumeGame()
 			if levelDataLog[i]['Level'] != difficultyLevel: # Relevant only to Condition 1: If the difficulty level has changed upon resume, update the level data log.
 				logAppleCatchData()
-				levelDataLog.append({'Game Timer': gamePlayClock.getTime(), 'Level': difficultyLevel})
+				levelDataLog.append({'Level Change Time': gamePlayClock.getTime(), 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 				i += 1
 
 	drawCommonGameGraphics()
@@ -438,9 +446,10 @@ def playCond3():
 		logAppleCatchData()
 		i += 1
 		changeDifficulty(levelDataLog[i]['Level']) # Yoke difficulty level to that of condition 1
+		levelDataLog[i].update({'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 		difficultyScale.setLevel(difficultyLevel)
 		if i+1 < len(levelDataLog):
-			nextLevelChangeTime = levelDataLog[i+1]['Game Timer']
+			nextLevelChangeTime = levelDataLog[i+1]['Level Change Time']
 		else:
 			nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 
@@ -461,12 +470,12 @@ def createChangeLogCsv():
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Game Timer', 'Level']
+	column_labels = ['Level Change Time', 'Level']
 	with open(outputFilePath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
 		for entry in levelDataLog:
-			levelChangeDict = {'Game Timer': entry['Game Timer'], 'Level': entry['Level']} # Extract just the 'Game Timer' and 'Level' data from levelDataLog
+			levelChangeDict = {'Level Change Time': entry['Level Change Time'], 'Level': entry['Level']} # Extract just the 'Level Change Time' and 'Level' data from levelDataLog (these are the data needed for yoking)
 			writer.writerow(levelChangeDict)
 
 # Converts csv containing level changes (from participant in Condition 1) to an array of dictionaries. Used only in Condition 3 for yoking.
@@ -477,11 +486,11 @@ def changeLogCsvToDict():
 	with open(inputFilePath) as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
-			levelDataLog.append({'Game Timer': float(row['Game Timer']), 'Level': int(row['Level'])})
+			levelDataLog.append({'Level Change Time': float(row['Level Change Time']), 'Level': int(row['Level'])})
 
 # Write participant data to two csv files (individual participant file and master file with data of all participants)
 def participantDataToCsv():
-	outputFileName = date + '_' + strftime('%H%M%S') + '_' + 'PID' + '-'+ participantID + '.csv'
+	outputFileName = 'PID' + '-'+ participantID + '_' + date + '_' + strftime('%H%M%S') + '.csv'
 	outputFolderName = 'Individual-Participant-Data'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName) # filepath for individual participant data files
 
@@ -492,7 +501,7 @@ def participantDataToCsv():
 	masterFileName = 'Master-Participant-Data.csv'
 	masterFilePath = os.path.join(os.getcwd(), masterFileName) # filepath for the master participant data file (holds data of all participants in 1 file)
 
-	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Game Timer', 'Level', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses']
+	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -594,7 +603,7 @@ if condition == 1 or condition == 3:
 if condition == 3:
 	changeLogCsvToDict()
 	if i+1 < len(levelDataLog):
-		nextLevelChangeTime = levelDataLog[i+1]['Game Timer']
+		nextLevelChangeTime = levelDataLog[i+1]['Level Change Time']
 	else:
 		nextLevelChangeTime = gamePlayLength + 100 # If there are no more level changes, make the next level change time unreachable
 
@@ -610,7 +619,7 @@ gamePlayClock = core.Clock() # Effectively starts the game play timer
 
 # Run the appropriate game for the condition
 if condition == 1:
-	levelDataLog.append({'Game Timer': 0, 'Level': difficultyLevel})
+	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
@@ -619,7 +628,7 @@ if condition == 1:
 		win.flip()
 	createChangeLogCsv()
 elif condition == 2:
-	levelDataLog.append({'Game Timer': 0, 'Level': difficultyLevel})
+	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
@@ -627,6 +636,7 @@ elif condition == 2:
 		mouse.clickReset()
 		win.flip()
 elif condition == 3:
+	levelDataLog[i].update({'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
