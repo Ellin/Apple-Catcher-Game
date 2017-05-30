@@ -488,18 +488,24 @@ def changeLogCsvToDict():
 		for row in reader:
 			levelDataLog.append({'Level Change Time': float(row['Level Change Time']), 'Level': int(row['Level'])})
 
-# Write participant data to two csv files (individual participant file and master file with data of all participants)
+# Write participant data to two csv files (individual participant file and master file with data of all participants of the same condition)
 def participantDataToCsv():
-	outputFileName = 'PID' + '-'+ participantID + '_' + date + '_' + strftime('%H%M%S') + '.csv'
-	outputFolderName = 'Individual-Participant-Data'
+	if condition == 1:
+		outputFolderName = 'Individual-Participant-Data_Condition-1' # folder name for individual participant data files
+		masterFileName = 'Master-Participant-Data_Condition-1.csv'  # filepath for the master participant data file
+	elif condition == 2:
+		outputFolderName = 'Individual-Participant-Data_Condition-2'
+		masterFileName = 'Master-Participant-Data_Condition-2.csv'
+	elif condition == 3:
+		outputFolderName = 'Individual-Participant-Data_Condition-3'
+		masterFileName = 'Master-Participant-Data_Condition-3.csv'
+
+	outputFileName = 'PID' + '-'+ participantID + '_' + date + '_' + strftime('%H%M%S') + '.csv' # file name format for individual participant data files
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName) # filepath for individual participant data files
 
 	# If the output folder does not exist, create it
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
-
-	masterFileName = 'Master-Participant-Data.csv'
-	masterFilePath = os.path.join(os.getcwd(), masterFileName) # filepath for the master participant data file (holds data of all participants in 1 file)
 
 	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
@@ -510,6 +516,7 @@ def participantDataToCsv():
 			participantDataDict.update(entry)
 			writer.writerow(participantDataDict)
 
+	masterFilePath = os.path.join(os.getcwd(), masterFileName) # filepath for the master participant data file (holds data of all participants in 1 file)
 	masterFileExists = os.path.isfile(masterFilePath) # Boolean variable for whether the master file already exists
 	with open(masterFilePath, 'ab') as new_csvfile: # appends the same data as above to master participant data file
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
