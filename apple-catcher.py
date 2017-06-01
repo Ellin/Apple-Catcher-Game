@@ -1,8 +1,18 @@
-from psychopy import core, event, gui, visual
+from psychopy import core, event, gui, visual, iohub
 from time import strftime
 import os, csv, random
 import pylab
 import tools
+
+# CONFIGURABLE CONSTANTS
+
+# Windows settings for how much the display is zoomed in by.
+dpiMultiplier = 1.5
+
+
+
+
+io = iohub.launchHubServer()
 
 # Condition 1: Can pause to change difficulty levels at any time
 # Condition 2: Can set difficulty level once at the beginning
@@ -44,7 +54,8 @@ windowWidth = 2.0
 windowHeight = 2.0
 
 # Get mouse
-mouse = event.Mouse()
+# mouse = event.Mouse()
+mouse = tools.FineGrainedMouse(io, win, dpiMultiplier=dpiMultiplier)
 
 # Initialize Level Data Log
 # The level data log is an array of dictionaries that will collect data (i.e. gamer timer, level, apple drop time, drop interval length, apples dropped, hits, misses, near misses, % hits, % misses, % near misses) for each level that the participant plays
@@ -84,7 +95,7 @@ elif condition == 3:
 	gameInstructionsText = 'Condition 3 instructions: You have finished the practise round. Unlike the practise round, you will *not* be able to change the difficulty level of the game. The difficulty of the game may or may not change as you play, but you will not be able to choose when these changes happen. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.5
 gameInstructions = visual.TextStim(win, wrapWidth = 2, text = gameInstructionsText, color = 'black', height = 0.08)
-difficultyScaleCond2 = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5)) # Difficulty scale for condition 2 where participants set their difficulty level for the game
+difficultyScaleCond2 = tools.Scale(win, mouse = mouse, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5)) # Difficulty scale for condition 2 where participants set their difficulty level for the game
 startButtonBoxPosX = 0
 startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
 startButtonText = visual.TextStim(win, text = 'start', color = 'black', height = 0.08, pos = (startButtonBoxPosX, startButtonBoxPosY))
@@ -103,10 +114,10 @@ q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during
 q2 = visual.TextStim(win, alignHoriz = 'left', text = 'How frustrated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
 q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0))
 q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How challenging did you find this study?', color = 'black', height = 0.08, pos = (-0.9, -0.4))
-q1Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.8))
-q2Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.4))
-q3Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0))
-q4Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, -0.4))
+q2Scale = tools.Scale(win, mouse = mouse, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.4))
+q3Scale = tools.Scale(win, mouse = mouse, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0))
+q1Scale = tools.Scale(win, mouse = mouse, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.8))
+q4Scale = tools.Scale(win, mouse = mouse, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, -0.4))
 q1Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all boring', color = 'black', height = 0.045, pos = (0.25, 0.65))
 q1Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, 0.65))
 q1Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely boring', color = 'black', height = 0.045, pos = (0.75, 0.65))
@@ -190,7 +201,7 @@ optionsBoxPosY = bottomGameAreaEdge - optionsBoxHeight/2.0
 optionsBox = visual.Rect(win, fillColor = 'grey', width = optionsBoxWidth, height = optionsBoxHeight, pos = (optionsBoxPosX, optionsBoxPosY))
 
 # Difficulty Scale
-difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
+difficultyScale = tools.Scale(win, mouse = mouse, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 
 # Score display
 scoreDisplay = visual.TextStim(win, text = 'Score: 0', color = 'white', height = 0.1, pos = (0, optionsBoxPosY))

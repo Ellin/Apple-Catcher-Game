@@ -1,4 +1,13 @@
 from psychopy import visual, event
+from psychopy.iohub.client import ioHubConnection
+from psychopy.iohub.constants import EventConstants, MouseConstants
+import numpy
+
+def pix2norm(pix, win):
+	""" Converts a pixel unit (x,y) to a norm unit. Requires the window that is being used. """
+	halfXPix = win.size[0] / 2.0
+	halfYPix = win.size[1] / 2.0
+	return (pix[0]/halfXPix, pix[1]/halfYPix)
 
 class Button(object):
 	""" Turns an ImageStim or a shape into a button.
@@ -26,7 +35,7 @@ class Button(object):
 
 class Scale(object):
 	"""docstring for Scale.. units in norm"""
-	def __init__(self, win, scaleColor, activeColor, startLevel, width, height, pos, opacity = 1):
+	def __init__(self, win, mouse, scaleColor, activeColor, startLevel, width, height, pos, opacity = 1):
 		self.win = win
 		self.scaleColor = scaleColor
 		self.activeColor = activeColor
@@ -49,7 +58,6 @@ class Scale(object):
 		self.rightArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barRightEdge + arrowWidth/2.0, self.posY), ori = 90, opacity = self.opacity)
 		
 		# Make the scale arrows function as buttons
-		mouse = event.Mouse()
 		self.leftArrowButton = Button(self.leftArrow, mouse)
 		self.rightArrowButton = Button(self.rightArrow, mouse)
 
@@ -163,3 +171,87 @@ class Scale(object):
 		textStim.setOpacity(newOpacity)
 		textStim.setText('') # Change the text to force psychopy to update the textstim's properties (opacity) instead of relying on a cached version
 		textStim.setText(originalText)
+
+
+class FineGrainedMouse(object):
+	"""
+	A mouse object that will detect and save mouse presses (and releases) with very fine timing.
+
+	WARNING: Only one of these should be created per program.
+
+	This is not limited by the refresh rate of the monitor and should work with touchscreens.
+	"""
+	def __init__(self, io, win, dpiMultiplier=1.0):
+		"""
+		Args:
+			io (ioHubConnection): the object returned by psychopy.iohub.launchHubServer() 
+			win (visual.Window): the psychopy window. This must be fullscreen.
+			dpiMultiplier (float): how much the screen is zoomed in by. This is a Windows setting.
+				Needed because the pixel calculations don't work on systems where the display has
+				been zoomed in. Generally, this would only be set on high DPI monitors.
+				Example input: 150% = 1.5
+		"""
+		if not isinstance(io, ioHubConnection):
+			raise TypeError("io must be the object returned by psychopy.iohub.launchHubServer()")
+		self._io = io
+		self._win = win
+		self._dpiMultiplier = float(dpiMultiplier)
+		self._resetMousePresses()
+
+		self.units = 'norm'
+
+	def _resetMousePresses(self):
+		self._recordedMousePresses = [False, False, False]
+
+	def _rescalePosition(self, position):
+		# On a display with zoom level 1.5, (0, 0) appears in the top-left third of the screen.
+		# i.e. where the * appears in the following diagram.
+		# x|x|x
+		# -*---
+		# x|x|x
+		# -----
+		# x|x|x
+		winSizeX = self._win.size[0]
+		winSizeY = self._win.size[1]
+		scaledWinSizeX = winSizeX / self._dpiMultiplier
+		scaledWinSizeY = winSizeY / self._dpiMultiplier
+		# first, translate the position so that (0, 0) is at the top left corner
+		translatedPos = [position[0] + (scaledWinSizeX / 2.0), position[1] - (scaledWinSizeY / 2.0)]
+		return [translatedPos[0] - (winSizeX / 2.0), translatedPos[1] + (winSizeY / 2.0)]
+
+
+	def clickReset(self):
+		"""
+		Reset all stored mouse button clicks since the last call to clickReset.
+		"""
+		self._resetMousePresses()
+
+	def getPressed(self):
+		"""
+		Returns a 3-item list indicating whether or not the corresponding mouse button has been pressed since the last call to clickReset.
+
+		The list elements represent the LEFT, MIDDLE, and RIGHT mouse buttons in that order.
+		"""
+		buttonPressEvents = self._io.devices.mouse.getEvents(event_type_id = EventConstants.MOUSE_BUTTON_PRESS)
+		for event in buttonPressEvents:
+			leftButtonPressed = event.pressed_buttons & MouseConstants.MOUSE_BUTTON_LEFT == MouseConstants.MOUSE_BUTTON_LEFT
+			middleButtonPressed = event.pressed_buttons & MouseConstants.MOUSE_BUTTON_MIDDLE == MouseConstants.MOUSE_BUTTON_MIDDLE
+			rightButtonPressed = event.pressed_buttons & MouseConstants.MOUSE_BUTTON_RIGHT == MouseConstants.MOUSE_BUTTON_RIGHT
+			self._recordedMousePresses = [
+				self._recordedMousePresses[0] or leftButtonPressed,
+				self._recordedMousePresses[1] or middleButtonPressed,
+				self._recordedMousePresses[2] or rightButtonPressed,
+			]
+		return self._recordedMousePresses
+
+	def getPos(self):
+		"""
+		Returns the current mouse position in 'norm' units as a 2-item numpy list (x,y).
+		"""
+		rawPosition = self._io.devices.mouse.getPosition()
+
+		# numpy array is required because psychopy uses numpy arrays in their 'contains' calculations.
+
+		# rescale position is required because of problems with high DPI monitors. Setting a
+		# display zoom in Windows causes ioHub to report the current mouse position incorrectly.
+		return numpy.array(pix2norm(self._rescalePosition(rawPosition), self._win))
