@@ -9,9 +9,6 @@ import tools
 # Windows settings for how much the display is zoomed in by.
 dpiMultiplier = 1.5
 
-
-
-
 io = iohub.launchHubServer()
 
 # Condition 1: Can pause to change difficulty levels at any time
@@ -70,8 +67,8 @@ nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width ra
 misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
 
 # Time variables (Unit = seconds)
-practisePlayLength = 5 # Practise play time (excluding pauses)
-gamePlayLength = 20 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 1 # Practise play time (excluding pauses)
+gamePlayLength = 30 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -178,13 +175,13 @@ apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight)
 # Apple animation settings 
 difficultyLevel = 4 # Initial setting
 difficultyDict = { # difficultyDict is a dictionary containing a dictionary of 'interval' & 'drop time' settings associated with each difficulty level
-	1: {'interval': 4, 'drop time': 8}, 
-	2: {'interval': 3, 'drop time': 6}, 
-	3: {'interval': 2, 'drop time': 4}, 
-	4: {'interval': 1, 'drop time': 2},  
-	5: {'interval': 0.5, 'drop time': 1}, 
-	6: {'interval': 0.25, 'drop time': 0.5}, 
-	7: {'interval': 0, 'drop time': 0.25}}
+	1: {'interval': 2.2, 'drop time': 2.4}, 
+	2: {'interval': 1.8, 'drop time': 2}, 
+	3: {'interval': 1.4, 'drop time': 1.6}, 
+	4: {'interval': 1, 'drop time': 1.2},  
+	5: {'interval': 0.7, 'drop time': 0.9}, 
+	6: {'interval': 0.25, 'drop time': 0.6}, 
+	7: {'interval': 0, 'drop time': 0.3}}
 dropIntervalLength = difficultyDict[difficultyLevel]['interval'] # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
 appleDropTime = difficultyDict[difficultyLevel]['drop time'] # Unit = seconds. The time it takes for an apple to hit the ground.
 appleDecrement = gameAreaHeight/(frameRate*appleDropTime) # The decrement is how much down the screen the apple should drop per frame
