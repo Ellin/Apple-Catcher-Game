@@ -173,6 +173,9 @@ class Scale(object):
 		textStim.setText(originalText)
 
 
+# This class is used to fix Psychopy's touchscreen bug (https://discourse.psychopy.org/t/windows7-use-of-touchscreen-monitor-as-mouse-unexpected-behavior/1317/13)
+# Basically the bug is that a tap on a touchscreen counts as a mouse press down and then up, but this all happens within a single frame, so the mouse press down is not detected since the mouse release is what's last registered
+# The fix uses ioHubConnection which keeps track of all i/o events to manually retrieve mouse events
 class FineGrainedMouse(object):
 	"""
 	A mouse object that will detect and save mouse presses (and releases) with very fine timing.
