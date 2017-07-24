@@ -248,7 +248,7 @@ def getAppleEdges():
 	appleRightEdge = applePosX + appleWidth/2.0
 	return {'top': appleTopEdge, 'bottom': appleBottomEdge, 'left': appleLeftEdge, 'right': appleRightEdge}
 
-# Move basket to track the mouse
+# Move basket to track the mouse 
 def moveBasket():
 	mousePos = mouse.getPos()
 	global basketPosX
@@ -372,7 +372,6 @@ def drawCommonGameGraphics():
 	apple.draw()
 	basket.draw()
 	optionsBox.draw()
-	difficultyScale.draw()
 	scoreDisplay.draw()
 
 # Play practise trial for participant
@@ -394,6 +393,7 @@ def playPractise():
 			resumeGame()
 
 	drawCommonGameGraphics()
+	difficultyScale.draw()
 	pauseButtonBox.draw()
 	pauseButtonText.draw()
 	bkgPauseOverlay.draw()
@@ -422,6 +422,7 @@ def playCond1():
 				i += 1
 
 	drawCommonGameGraphics()
+	difficultyScale.draw()
 	timerStim.draw()
 	pauseButtonBox.draw()
 	pauseButtonText.draw()
@@ -446,7 +447,6 @@ def playCond3():
 		i += 1
 		changeDifficulty(levelDataLog[i]['Level']) # Yoke difficulty level to that of condition 1
 		levelDataLog[i].update({'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
-		difficultyScale.setLevel(difficultyLevel)
 		if i+1 < len(levelDataLog):
 			nextLevelChangeTime = levelDataLog[i+1]['Level Change Time']
 		else:
