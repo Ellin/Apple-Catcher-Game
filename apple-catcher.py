@@ -248,12 +248,11 @@ def getAppleEdges():
 	appleRightEdge = applePosX + appleWidth/2.0
 	return {'top': appleTopEdge, 'bottom': appleBottomEdge, 'left': appleLeftEdge, 'right': appleRightEdge}
 
-# Move basket to track the mouse (as long as mouse is not in the game options area)
+# Move basket to track the mouse
 def moveBasket():
 	mousePos = mouse.getPos()
 	global basketPosX
-	if (not optionsBox.contains(mouse)):
-		basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
+	basketPosX = mousePos[0] # Set basket's x position to the mouse's x position
 	basketEdges = getBasketEdges()
 	# Restrict basket within the game area
 	if basketEdges['left'] <= leftGameAreaEdge:
