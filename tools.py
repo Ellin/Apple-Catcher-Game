@@ -94,6 +94,25 @@ class Scale(object):
 		self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
 		self.tickDict[self.activeLevel]['label'].color = self.activeColor
 
+		# Create clickable (invisible) boxes around the ticks & tick labels so you can skip using the arrow buttons and click directly on the ticks or labels on the scale
+		tickBoxPosY = self.posY - self.height/2.0
+		tickBoxWidth = tickIntervalWidth * 0.9
+		tickBoxHeight = self.height * 2.5
+		self.tick1box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth/2.0, height = tickBoxHeight, pos = (tick1PosX + tickBoxWidth/4.0, tickBoxPosY), opacity = self.opacity)
+		self.tick2box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth, height = tickBoxHeight, pos = (tick2PosX, tickBoxPosY), opacity = self.opacity)
+		self.tick3box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth, height = tickBoxHeight, pos = (tick3PosX, tickBoxPosY), opacity = self.opacity)
+		self.tick4box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth, height = tickBoxHeight, pos = (tick4PosX, tickBoxPosY), opacity = self.opacity)
+		self.tick5box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth, height = tickBoxHeight, pos = (tick5PosX, tickBoxPosY), opacity = self.opacity)
+		self.tick6box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth, height = tickBoxHeight, pos = (tick6PosX, tickBoxPosY), opacity = self.opacity)
+		self.tick7box = visual.Rect(self.win, lineColor = self.scaleColor, width = tickBoxWidth/2.0, height = tickBoxHeight, pos = (tick7PosX - tickBoxWidth/4.0, tickBoxPosY), opacity = self.opacity)
+		self.tick1button = Button(self.tick1box, mouse)
+		self.tick2button = Button(self.tick2box, mouse)
+		self.tick3button = Button(self.tick3box, mouse)
+		self.tick4button = Button(self.tick4box, mouse)
+		self.tick5button = Button(self.tick5box, mouse)
+		self.tick6button = Button(self.tick6box, mouse)
+		self.tick7button = Button(self.tick7box, mouse)
+
 	def hasLevelChanged(self):
 		if self.leftArrowButton.isClicked():
 			if self.activeLevel > 1:
@@ -108,6 +127,62 @@ class Scale(object):
 				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
 				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
 				self.activeLevel += 1
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick1button.isClicked():
+			if self.activeLevel != 1:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 1
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick2button.isClicked():
+			if self.activeLevel != 2:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 2
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick3button.isClicked():
+			if self.activeLevel != 3:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 3
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick4button.isClicked():
+			if self.activeLevel != 4:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 4
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick5button.isClicked():
+			if self.activeLevel != 5:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 5
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick6button.isClicked():
+			if self.activeLevel != 6:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 6
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
+				self.tickDict[self.activeLevel]['label'].color = self.activeColor
+				return True
+		if self.tick7button.isClicked():
+			if self.activeLevel != 7:
+				self.tickDict[self.activeLevel]['tick'].lineColor = self.scaleColor
+				self.tickDict[self.activeLevel]['label'].color = self.scaleColor
+				self.activeLevel = 7
 				self.tickDict[self.activeLevel]['tick'].lineColor = self.activeColor
 				self.tickDict[self.activeLevel]['label'].color = self.activeColor
 				return True
@@ -138,6 +213,15 @@ class Scale(object):
 		self.tick5Label.draw()
 		self.tick6Label.draw()
 		self.tick7Label.draw()
+
+		# Uncomment the block below to see the tick button boundaries
+		# self.tick1box.draw()
+		# self.tick2box.draw()
+		# self.tick3box.draw()
+		# self.tick4box.draw()
+		# self.tick5box.draw()
+		# self.tick6box.draw()
+		# self.tick7box.draw()
 
 	def setOpacity(self, newOpacity):
 		self.leftArrow.opacity = newOpacity
