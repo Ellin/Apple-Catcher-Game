@@ -59,8 +59,8 @@ nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width ra
 misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
 
 # Time variables (Unit = seconds)
-practisePlayLength = 5 # Practise play time (excluding pauses)
-gamePlayLength = 20 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 1 # Practise play time (excluding pauses)
+gamePlayLength = 1 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -99,30 +99,24 @@ probeStartButtonText = visual.TextStim(win, text = 'Next', color = 'black', heig
 probeStartButton = tools.Button(probeStartButtonBox, mouse)
 
 # Probe Screen
-q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.8))
+q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.7))
 q2 = visual.TextStim(win, alignHoriz = 'left', text = 'How frustrated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
-q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0))
-q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How challenging did you find this study?', color = 'black', height = 0.08, pos = (-0.9, -0.4))
-q1Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.8))
-q2Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0.4))
-q3Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, 0))
-q4Scale = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.6, height = 0.06, pos = (0.5, -0.4))
-q1Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all boring', color = 'black', height = 0.045, pos = (0.25, 0.65))
-q1Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, 0.65))
-q1Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely boring', color = 'black', height = 0.045, pos = (0.75, 0.65))
-q2Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all frustrating', color = 'black', height = 0.045, pos = (0.25, 0.25))
-q2Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, 0.25))
-q2Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely frustrating', color = 'black', height = 0.045, pos = (0.75, 0.25))
-q3Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all motivated', color = 'black', height = 0.045, pos = (0.25, -0.15))
-q3Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, -0.15))
-q3Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely motivated', color = 'black', height = 0.045, pos = (0.75, -0.15))
-q4Label1 = visual.TextStim(win, wrapWidth = 0.15, text = 'Not at all challenging', color = 'black', height = 0.045, pos = (0.25, -0.55))
-q4Label2 = visual.TextStim(win, wrapWidth = 0.15, text = 'Neutral', color = 'black', height = 0.045, pos = (0.5, -0.55))
-q4Label3 = visual.TextStim(win, wrapWidth = 0.15, text = 'Extremely challenging', color = 'black', height = 0.045, pos = (0.75, -0.55))
+q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.1))
+q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How challenging did you find this study?', color = 'black', height = 0.08, pos = (-0.9, -0.2))
+q5 = visual.TextStim(win, alignHoriz = 'left', text = 'How in control did you feel during this study?', color = 'black', height = 0.08, pos = (-0.9, -0.5))
+q1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.7))
+q2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.4))
+q3Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.1))
+q4Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, -0.2))
+q5Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, -0.5))
+likertLabel1 = visual.TextStim(win, text = 'Not at all', color = 'black', height = 0.07, pos = (0.2, 0.9))
+likertLabel2 = visual.TextStim(win, text = 'Neutral', color = 'black', height = 0.07, pos = (0.5, 0.9))
+likertLabel3 = visual.TextStim(win, text = 'Extremely', color = 'black', height = 0.07, pos = (0.8, 0.9))
 q1Answer = 4 # Default answer is 4 (middle of the scale)
 q2Answer = 4
 q3Answer = 4
 q4Answer = 4
+q5Answer = 4
 probeSubmitButtonBoxPosX = 0
 probeSubmitButtonBoxPosY = -0.8
 probeSubmitButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeSubmitButtonBoxPosX, probeSubmitButtonBoxPosY))
@@ -506,7 +500,7 @@ def participantDataToCsv():
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -535,34 +529,30 @@ def displayProbe():
 	global q2Answer
 	global q3Answer
 	global q4Answer
+	global q5Answer
 	q1.draw()
 	q2.draw()
 	q3.draw()
 	q4.draw()
-	q1Label1.draw()
-	q1Label2.draw()
-	q1Label3.draw()
-	q2Label1.draw()
-	q2Label2.draw()
-	q2Label3.draw()
-	q3Label1.draw()
-	q3Label2.draw()
-	q3Label3.draw()
-	q4Label1.draw()
-	q4Label2.draw()
-	q4Label3.draw()
-	if q1Scale.hasLevelChanged():
-		q1Answer = q1Scale.activeLevel
-	if q2Scale.hasLevelChanged():
-		q2Answer = q2Scale.activeLevel
-	if q3Scale.hasLevelChanged():
-		q3Answer = q3Scale.activeLevel
-	if q4Scale.hasLevelChanged():
-		q4Answer = q4Scale.activeLevel
+	q5.draw()
+	likertLabel1.draw()
+	likertLabel2.draw()
+	likertLabel3.draw()
+	if q1Scale.hasRatingChanged():
+		q1Answer = q1Scale.activeRating
+	if q2Scale.hasRatingChanged():
+		q2Answer = q2Scale.activeRating
+	if q3Scale.hasRatingChanged():
+		q3Answer = q3Scale.activeRating
+	if q4Scale.hasRatingChanged():
+		q4Answer = q4Scale.activeRating
+	if q5Scale.hasRatingChanged():
+		q5Answer = q5Scale.activeRating
 	q1Scale.draw()
 	q2Scale.draw()
 	q3Scale.draw()
 	q4Scale.draw()
+	q5Scale.draw()
 	probeSubmitButtonBox.draw()
 	probeSubmitButtonText.draw()
 
@@ -667,7 +657,7 @@ while not probeSubmitButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
-participantDataDict.update({'Date': date, 'Time': time,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer})
+participantDataDict.update({'Date': date, 'Time': time,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer})
 
 # Write all participant data collected over the duration of the experiment to csv files
 participantDataToCsv()

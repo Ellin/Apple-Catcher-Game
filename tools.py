@@ -247,3 +247,168 @@ class Scale(object):
 		textStim.setOpacity(newOpacity)
 		textStim.setText('') # Change the text to force psychopy to update the textstim's properties (opacity) instead of relying on a cached version
 		textStim.setText(originalText)
+
+class BoxScale(object):
+	"""docstring for BoxScale.. units in norm"""
+	def __init__(self, win, boxLineColor, boxFillColor, textColor, activeFillColor, activeTextColor, defaultRating, width, height, pos, opacity = 1):
+		self.win = win
+		self.boxLineColor = boxLineColor
+		self.boxFillColor = boxFillColor
+		self.textColor = textColor
+		self.activeFillColor = activeFillColor
+		self.activeTextColor = activeTextColor
+		self.activeRating = defaultRating # default active rating is the starting rating
+		self.width = width
+		self.height = height
+		self.posX = pos[0]
+		self.posY = pos[1]
+		self.opacity = opacity
+
+		boxWidth = self.width/7.0 # scale has 7 boxes
+
+		# Calculate the x positions of the rating boxes
+		box1PosX = self.posX - (3*boxWidth)
+		box2PosX = self.posX - (2*boxWidth)
+		box3PosX = self.posX - (1*boxWidth)
+		box4PosX = self.posX
+		box5PosX = self.posX + (1*boxWidth)
+		box6PosX = self.posX + (2*boxWidth)
+		box7PosX = self.posX + (3*boxWidth)
+
+		# Create box labels
+		textHeight = self.height * 0.5
+		self.box1Label = visual.TextStim(self.win, text = '1', height = textHeight, color = self.textColor, pos = (box1PosX, self.posY), opacity = self.opacity)
+		self.box2Label = visual.TextStim(self.win, text = '2', height = textHeight, color = self.textColor, pos = (box2PosX, self.posY), opacity = self.opacity)
+		self.box3Label = visual.TextStim(self.win, text = '3', height = textHeight, color = self.textColor, pos = (box3PosX, self.posY), opacity = self.opacity)
+		self.box4Label = visual.TextStim(self.win, text = '4', height = textHeight, color = self.textColor, pos = (box4PosX, self.posY), opacity = self.opacity)
+		self.box5Label = visual.TextStim(self.win, text = '5', height = textHeight, color = self.textColor, pos = (box5PosX, self.posY), opacity = self.opacity)
+		self.box6Label = visual.TextStim(self.win, text = '6', height = textHeight, color = self.textColor, pos = (box6PosX, self.posY), opacity = self.opacity)
+		self.box7Label = visual.TextStim(self.win, text = '7', height = textHeight, color = self.textColor, pos = (box7PosX, self.posY), opacity = self.opacity)
+
+		# Create clickable boxes
+		mouse = event.Mouse()
+		self.box1 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box1PosX, self.posY), opacity = self.opacity)
+		self.box2 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box2PosX, self.posY), opacity = self.opacity)
+		self.box3 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box3PosX, self.posY), opacity = self.opacity)
+		self.box4 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box4PosX, self.posY), opacity = self.opacity)
+		self.box5 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box5PosX, self.posY), opacity = self.opacity)
+		self.box6 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box6PosX, self.posY), opacity = self.opacity)
+		self.box7 = visual.Rect(self.win, lineColor = self.boxLineColor, fillColor = self.boxFillColor, width = boxWidth, height = self.height, pos = (box7PosX, self.posY), opacity = self.opacity)
+		self.box1button = Button(self.box1, mouse)
+		self.box2button = Button(self.box2, mouse)
+		self.box3button = Button(self.box3, mouse)
+		self.box4button = Button(self.box4, mouse)
+		self.box5button = Button(self.box5, mouse)
+		self.box6button = Button(self.box6, mouse)
+		self.box7button = Button(self.box7, mouse)
+
+		# Create rating dictionary
+		self.ratingDict = {1: {'box': self.box1, 'label': self.box1Label}, 2: {'box': self.box2, 'label': self.box2Label}, 3: {'box': self.box3, 'label': self.box3Label}, 4: {'box': self.box4, 'label': self.box4Label}, 5: {'box': self.box5, 'label': self.box5Label}, 6: {'box': self.box6, 'label': self.box6Label}, 7: {'box': self.box7, 'label': self.box7Label}}
+		
+		# Set active colors
+		self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+		self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+
+	def hasRatingChanged(self):
+		if self.box1button.isClicked():
+			if self.activeRating != 1:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 1
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		if self.box2button.isClicked():
+			if self.activeRating != 2:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 2
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		if self.box3button.isClicked():
+			if self.activeRating != 3:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 3
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		if self.box4button.isClicked():
+			if self.activeRating != 4:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 4
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		if self.box5button.isClicked():
+			if self.activeRating != 5:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 5
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		if self.box6button.isClicked():
+			if self.activeRating != 6:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 6
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		if self.box7button.isClicked():
+			if self.activeRating != 7:
+				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				self.activeRating = 7
+				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+				return True
+		return False
+
+	def setRating(self, newRating):
+		self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+		self.ratingDict[self.activeRating]['label'].color = self.textColor
+		self.activeRating = newRating
+		self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+		self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+
+	def draw(self):
+		self.box1.draw()
+		self.box2.draw()
+		self.box3.draw()
+		self.box4.draw()
+		self.box5.draw()
+		self.box6.draw()
+		self.box7.draw()
+		self.box1Label.draw()
+		self.box2Label.draw()
+		self.box3Label.draw()
+		self.box4Label.draw()
+		self.box5Label.draw()
+		self.box6Label.draw()
+		self.box7Label.draw()
+
+	def setOpacity(self, newOpacity):
+		self.box1.opacity = newOpacity
+		self.box2.opacity = newOpacity
+		self.box3.opacity = newOpacity
+		self.box4.opacity = newOpacity
+		self.box5.opacity = newOpacity
+		self.box6.opacity = newOpacity
+		self.box7.opacity = newOpacity
+		self.setTextOpacity(self.box1Label, newOpacity)
+		self.setTextOpacity(self.box2Label, newOpacity)
+		self.setTextOpacity(self.box3Label, newOpacity)
+		self.setTextOpacity(self.box4Label, newOpacity)
+		self.setTextOpacity(self.box5Label, newOpacity)
+		self.setTextOpacity(self.box6Label, newOpacity)
+		self.setTextOpacity(self.box7Label, newOpacity)
+
+	def setTextOpacity(self, textStim, newOpacity): # Need this to change text opacity b/c of stupid psychopy bug (see github.com/psychopy/psychopy/issues/1045)
+		originalText = textStim.text
+		textStim.setOpacity(newOpacity)
+		textStim.setText('') # Change the text to force psychopy to update the textstim's properties (opacity) instead of relying on a cached version
+		textStim.setText(originalText)
