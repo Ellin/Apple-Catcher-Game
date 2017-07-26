@@ -60,11 +60,35 @@ misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss
 
 # Time variables (Unit = seconds)
 practisePlayLength = 1 # Practise play time (excluding pauses)
-gamePlayLength = 1 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 20 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
 #################################### Instruction / Text Display Screens #################################### 
+# Pre-Study (ps) Probe Instruction Screen
+psProbeInstructions = visual.TextStim(win, wrapWidth = 1.8, text = 'Please answer the questions on the following screen.', color = 'black', height = 0.08, pos = (0, 0.5))
+psProbeStartButtonBoxPosX = 0
+psProbeStartButtonBoxPosY = 0
+psProbeStartButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (psProbeStartButtonBoxPosX, psProbeStartButtonBoxPosY))
+psProbeStartButtonText = visual.TextStim(win, text = 'Next', color = 'black', height = 0.08, pos = (psProbeStartButtonBoxPosX, psProbeStartButtonBoxPosY))
+psProbeStartButton = tools.Button(psProbeStartButtonBox, mouse)
+
+# Pre-Study Probe Screen
+psQ1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored are you right now?', color = 'black', height = 0.08, pos = (-0.9, 0.7))
+psQ2 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated are you for this task?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
+psQ1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.7))
+psQ2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.4))
+psLikertLabel1 = visual.TextStim(win, text = 'Not at all', color = 'black', height = 0.07, pos = (0.2, 0.9))
+psLikertLabel2 = visual.TextStim(win, text = 'Neutral', color = 'black', height = 0.07, pos = (0.5, 0.9))
+psLikertLabel3 = visual.TextStim(win, text = 'Extremely', color = 'black', height = 0.07, pos = (0.8, 0.9))
+psQ1Answer = 4 # Default answer is 4 (middle of the scale)
+psQ2Answer = 4
+psProbeSubmitButtonBoxPosX = 0
+psProbeSubmitButtonBoxPosY = -0.8
+psProbeSubmitButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (psProbeSubmitButtonBoxPosX, psProbeSubmitButtonBoxPosY))
+psProbeSubmitButtonText = visual.TextStim(win, text = 'Submit', color = 'black', height = 0.08, pos = (psProbeSubmitButtonBoxPosX, psProbeSubmitButtonBoxPosY))
+psProbeSubmitButton = tools.Button(psProbeSubmitButtonBox, mouse)
+
 # Practise Trial Instruction Screen
 practiseInstructions = visual.TextStim(win, wrapWidth = 2, text = "Before you start the game, you will have about a minute to practise. Catch as many apples as you can by dragging the basket. Try changing the difficulty of the game by pressing pause to adjust the difficulty level using the scale in the bottom right corner of the screen. Press next to start the practise round.", color = 'black', height = 0.08)
 practiseButtonBoxPosX = 0
@@ -91,7 +115,7 @@ startButtonText = visual.TextStim(win, text = 'start', color = 'black', height =
 startButton = tools.Button(startButtonBox, mouse)
 
 # Probe Instruction Screen
-probeInstructions = visual.TextStim(win, wrapWidth = 1.8, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them. To adjust your answer, use the left or right arrow buttons.', color = 'black', height = 0.08, pos = (0, 0.5))
+probeInstructions = visual.TextStim(win, wrapWidth = 1.8, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them.', color = 'black', height = 0.08, pos = (0, 0.5))
 probeStartButtonBoxPosX = 0
 probeStartButtonBoxPosY = 0
 probeStartButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
@@ -198,6 +222,28 @@ pauseButtonBoxPosY = optionsBoxPosY
 pauseButtonBox = visual.Rect(win, fillColor ='darkgrey', width = 0.3, height = 0.15, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 pauseButtonText = visual.TextStim(win, text = 'Pause', color = 'white', height = 0.08, pos = (pauseButtonBoxPosX, pauseButtonBoxPosY))
 pauseButton = tools.Button(pauseButtonBox, mouse)
+
+def displayPSProbeInstructions(): # display pre-study probe instructions
+	psProbeInstructions.draw()
+	psProbeStartButtonBox.draw()
+	psProbeStartButtonText.draw()
+
+def displayPSProbe(): # display pre-study probe screen
+	global psQ1Answer
+	global psQ2Answer
+	psQ1.draw()
+	psQ2.draw()
+	psLikertLabel1.draw()
+	psLikertLabel2.draw()
+	psLikertLabel3.draw()
+	if psQ1Scale.hasRatingChanged():
+		psQ1Answer = psQ1Scale.activeRating
+	if psQ2Scale.hasRatingChanged():
+		psQ2Answer = psQ2Scale.activeRating
+	psQ1Scale.draw()
+	psQ2Scale.draw()
+	psProbeSubmitButtonBox.draw()
+	psProbeSubmitButtonText.draw()
 
 def displayGameInstructions():
 	gameInstructions.draw()
@@ -500,7 +546,7 @@ def participantDataToCsv():
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -562,6 +608,22 @@ def displayProbe():
 # Get date & time
 date = strftime("%Y-%m-%d") # Get current date
 time = strftime("%H:%M") # Get current time (the time when the data in the dialog box is submitted)
+
+# Display instruction screen for the pre-study probe
+while not psProbeStartButton.isClicked():
+	displayPSProbeInstructions()
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	mouse.clickReset()
+	win.flip()
+
+# Display pre-study probe screen
+while not psProbeSubmitButton.isClicked():
+	displayPSProbe()
+	if event.getKeys(keyList = ['q','escape']):
+		core.quit()
+	mouse.clickReset()
+	win.flip()
 
 # Display instruction screen for the practise trial
 while not practiseButton.isClicked():
@@ -657,7 +719,7 @@ while not probeSubmitButton.isClicked():
 	mouse.clickReset()
 	win.flip()
 
-participantDataDict.update({'Date': date, 'Time': time,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer})
+participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'Pre Q2': psQ2Answer,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer})
 
 # Write all participant data collected over the duration of the experiment to csv files
 participantDataToCsv()

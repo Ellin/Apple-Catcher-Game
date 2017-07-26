@@ -45,9 +45,12 @@ class Scale(object):
 
 		# Create scale arrows
 		arrowWidth = self.width * 0.1
-		self.leftArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barLeftEdge - arrowWidth/2.0, self.posY), ori = -90, opacity = self.opacity)
-		self.rightArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (barRightEdge + arrowWidth/2.0, self.posY), ori = 90, opacity = self.opacity)
-		
+		leftArrowPosX = barLeftEdge - arrowWidth/2.0
+		rightArrowPosX = barRightEdge + arrowWidth/2.0
+		# Note: Polygon is supposed to create regular polygons, but there is a bug in Psychopy... They didn't account for norm units. So the actual shape will turn out unexpected.
+		self.leftArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (leftArrowPosX, self.posY), ori = -90, opacity = self.opacity)
+		self.rightArrow = visual.Polygon(win, lineColor = self.scaleColor, fillColor = self.scaleColor, edges = 3, radius = arrowWidth/2.0, pos = (rightArrowPosX, self.posY), ori = 90, opacity = self.opacity)
+
 		# Make the scale arrows function as buttons
 		mouse = event.Mouse()
 		self.leftArrowButton = Button(self.leftArrow, mouse)
@@ -215,7 +218,6 @@ class Scale(object):
 		self.tick7Label.draw()
 
 		# Uncomment the block below to see the tick button boundaries
-		# self.tick1box.draw()
 		# self.tick2box.draw()
 		# self.tick3box.draw()
 		# self.tick4box.draw()
