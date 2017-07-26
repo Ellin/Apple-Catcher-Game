@@ -46,6 +46,10 @@ windowHeight = 2.0
 # Get mouse
 mouse = event.Mouse()
 
+# Initialize Frame Data Log
+frameDataLog = []
+frameNum = 0
+
 # Initialize Level Data Log
 # The level data log is an array of dictionaries that will collect data (i.e. gamer timer, level, apple drop time, drop interval length, apples dropped, hits, misses, near misses, % hits, % misses, % near misses) for each level that the participant plays
 levelDataLog = []
@@ -57,10 +61,11 @@ score = 0 # +1 point for every apple caught (counts for whole game, not per leve
 hits = 0 # Number of apples caught per level
 nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width range (1 basket width from the actual basket on each side)
 misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
+appleNum = 0 # The number of apples dropped
 
 # Time variables (Unit = seconds)
 practisePlayLength = 1 # Practise play time (excluding pauses)
-gamePlayLength = 20 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 8 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -341,12 +346,14 @@ def updateScoreAndHits():
 def resetApple():
 	global applePosX
 	global applePosY
+	global appleNum
 	dropIntervalClock.reset()
 	applePosY = appleStartPosY
 	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 	while abs(applePosX - basketPosX) < basketWidth + appleWidth/2.0: # Make sure the new apple drops at least a basket width + half the apple's width away from the participant's basket to force the participant to move at least half a basket width to catch the next apple
 		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 	apple.setPos([applePosX, applePosY])
+	appleNum += 1
 
 # Move the apple's position down
 def decrementApple():
@@ -405,6 +412,15 @@ def logAppleCatchData():
 	hits = 0
 	misses = 0
 	nearMisses = 0
+
+# For every frame, log the following game data: Time (actual time, not game timer), Frame, Level, Game Paused (1 = game is paused), Apple #, Basket Pos X, Basket Pos Y, Apple Pos X, Apple Pos Y
+def logFrameData():
+	time = strftime("%H:%M:%S") 
+	basketPosX = basket.pos[0]
+	basketPosY = basket.pos[1]
+	applePosX = apple.pos[0]
+	applePosY = apple.pos[1]
+	frameDataLog.append({'Time': time, 'Frame': frameNum, 'Game Paused': gamePaused, 'Level': difficultyLevel, 'Apple #': appleNum, 'Basket Pos X': basketPosX, 'Basket Pos Y': basketPosY, 'Apple Pos X': applePosX, 'Apple Pos Y': applePosY})
 
 # Draw game graphics common to practise trial and all conditions
 def drawCommonGameGraphics():
@@ -498,6 +514,29 @@ def playCond3():
 	updateTimerText()
 	drawCommonGameGraphics()
 	timerStim.draw()
+
+# Create a csv file from frameDataLog with the frame by frame game data
+def createFrameLogCsv():
+	if condition == 1:
+		outputFolderName = 'Frame-Data-Logs_Condition-1'
+	elif condition == 2:
+		outputFolderName = 'Frame-Data-Logs_Condition-2'
+	elif condition == 3:
+		outputFolderName = 'Frame-Data-Logs_Condition-3'
+
+	outputFileName = participantID + '.csv'
+	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
+
+	# If the output folder does not exist, create it
+	if not os.path.exists(outputFolderName):
+		os.makedirs(outputFolderName)
+
+	column_labels = ['Time', 'Frame', 'Game Paused', 'Level', 'Apple #', 'Basket Pos X', 'Basket Pos Y', 'Apple Pos X', 'Apple Pos Y']
+	with open(outputFilePath, 'wb') as new_csvfile:
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		writer.writeheader()
+		for entry in frameDataLog:
+			writer.writerow(entry)
 
 # Create a csv file containing level change data. Used only in Condition 1 to save the participant's level changes to a csv (which will later be used for yoking in Condition 3).
 def createChangeLogCsv():
@@ -670,6 +709,7 @@ score = 0
 hits = 0
 misses = 0
 nearMisses = 0
+appleNum = 0
 scoreDisplay.setText('Score: ' + str(score))
 difficultyScale.setLevel(difficultyLevel) # Visually set active level of difficulty scale to proper difficulty level
 resetApple() # Initialize apple (drop interval timer is also reset here)
@@ -678,10 +718,12 @@ gamePlayClock = core.Clock() # Effectively starts the game play timer
 # Run the appropriate game for the condition
 if condition == 1:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
-	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
+	while gamePlayClock.getTime() <= gamePlayLength or gamePaused:
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond1()
+		logFrameData()
+		frameNum += 1
 		mouse.clickReset()
 		win.flip()
 	createChangeLogCsv()
@@ -691,6 +733,8 @@ elif condition == 2:
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond2()
+		logFrameData()
+		frameNum += 1
 		mouse.clickReset()
 		win.flip()
 elif condition == 3:
@@ -699,6 +743,8 @@ elif condition == 3:
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond3()
+		logFrameData()
+		frameNum += 1
 		mouse.clickReset()
 		win.flip()
 logAppleCatchData()
@@ -723,6 +769,8 @@ participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'P
 
 # Write all participant data collected over the duration of the experiment to csv files
 participantDataToCsv()
+
+createFrameLogCsv()
 
 # Display end screen
 displayEndScreen()
