@@ -46,6 +46,11 @@ windowHeight = 2.0
 # Get mouse
 mouse = event.Mouse()
 
+# Initialize Overshoot Data Log & relevant variables
+overshootDataLog = []
+startBasketPosX = -1000 # the basket position the moment the apple's position has been reset to the top of the screen (the random initialization value here will be overwritten)
+endBasketPosX = -1000 # the basket position the moment the apple hits the ground/basket (the random initialization value here will be overwritten)
+
 # Initialize Frame Data Log
 frameDataLog = []
 frameNum = 0
@@ -61,10 +66,11 @@ score = 0 # +1 point for every apple caught (counts for whole game, not per leve
 hits = 0 # Number of apples caught per level
 nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width range (1 basket width from the actual basket on each side)
 misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
-appleNum = 0 # The number of apples dropped
+appleNum = 0 # The number of apples dropped so far
+catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
-practisePlayLength = 1 # Practise play time (excluding pauses)
+practisePlayLength = 5 # Practise play time (excluding pauses)
 gamePlayLength = 8 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
@@ -325,21 +331,26 @@ def isAppleTouchingGround():
 def updateMisses():
 	global nearMisses
 	global misses
+	global catchStatus
 	basketEdges = getBasketEdges()
 	appleEdges = getAppleEdges()
 	if isAppleCaught() == False & isAppleTouchingGround(): # If the apple hit the ground not in the basket, then check whether it is a near miss or a (complete) miss
 		if (appleEdges['left'] <= basketEdges['right'] + basketWidth) & (appleEdges['right'] >= basketEdges['left'] - basketWidth):
 			nearMisses += 1
+			catchStatus = 2
 		else:
 			misses +=1
+			catchStatus = 3
 
 # Update score & hit counts if apple has been caught.
 def updateScoreAndHits():
 	global score
 	global hits
+	global catchStatus
 	if isAppleCaught():
 		score += 1
 		hits +=1
+		catchStatus = 1
 		scoreDisplay.setText('Score: ' + str(score))
 
 # Reset apple position to top of screen. Also reset the drop interval clock.
@@ -347,6 +358,7 @@ def resetApple():
 	global applePosX
 	global applePosY
 	global appleNum
+	global startBasketPosX
 	dropIntervalClock.reset()
 	applePosY = appleStartPosY
 	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
@@ -354,6 +366,7 @@ def resetApple():
 		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 	apple.setPos([applePosX, applePosY])
 	appleNum += 1
+	startBasketPosX = basket.pos[0] # Get the basket's x position when the apple has been reset (this is used to calculate overshoot)
 
 # Move the apple's position down
 def decrementApple():
@@ -363,9 +376,12 @@ def decrementApple():
 
 # Checks for and updates hits/misses. Update apple position.
 def updateApple():
+	global endBasketPosX
 	if isAppleCaught() or isAppleTouchingGround():
-		updateMisses()
-		updateScoreAndHits()
+		endBasketPosX = basket.pos[0] # Get the basket's x position when the apple hits the basket/ground (this is used to calculate overshoot)
+		updateMisses() # Check for & update misses & near misses
+		updateScoreAndHits() # Check for & update hits & the score
+		logOvershootData()
 		resetApple()
 	else:
 		decrementApple()
@@ -412,6 +428,12 @@ def logAppleCatchData():
 	hits = 0
 	misses = 0
 	nearMisses = 0
+
+# For every apple drop, log the following data: Level, Apple #, Catch status (1=hit/2=near miss/3=miss), Overshoot (distance b/t apple center & basket center when the apple hits the ground/basket in norm units), Start basket x-pos (when apple is at reset position), End basket x-pos (when apple hits ground/basket), Apple x-pos
+def logOvershootData():
+	applePosX = apple.pos[0]
+	overshoot = abs(applePosX - endBasketPosX)
+	overshootDataLog.append({'Level': difficultyLevel, 'Apple #': appleNum, 'Catch Status': catchStatus, 'Overshoot': overshoot, 'Start Basket Pos X': startBasketPosX, 'End Basket Pos X': endBasketPosX, 'Apple Pos X': applePosX})
 
 # For every frame, log the following game data: Time (actual time, not game timer), Frame, Level, Game Paused (1 = game is paused), Apple #, Basket Pos X, Basket Pos Y, Apple Pos X, Apple Pos Y
 def logFrameData():
@@ -514,6 +536,29 @@ def playCond3():
 	updateTimerText()
 	drawCommonGameGraphics()
 	timerStim.draw()
+
+# Create a csv file from overshootDataLog 
+def createOvershootLogCsv():
+	if condition == 1:
+		outputFolderName = 'Overshoot-Data-Logs_Condition-1'
+	elif condition == 2:
+		outputFolderName = 'Overshoot-Data-Logs_Condition-2'
+	elif condition == 3:
+		outputFolderName = 'Overshoot-Data-Logs_Condition-3'
+
+	outputFileName = participantID + '.csv'
+	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
+
+	# If the output folder does not exist, create it
+	if not os.path.exists(outputFolderName):
+		os.makedirs(outputFolderName)
+
+	column_labels = ['Level', 'Apple #', 'Catch Status', 'Overshoot', 'Start Basket Pos X', 'End Basket Pos X', 'Apple Pos X']
+	with open(outputFilePath, 'wb') as new_csvfile:
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		writer.writeheader()
+		for entry in overshootDataLog:
+			writer.writerow(entry)
 
 # Create a csv file from frameDataLog with the frame by frame game data
 def createFrameLogCsv():
@@ -712,6 +757,7 @@ nearMisses = 0
 appleNum = 0
 scoreDisplay.setText('Score: ' + str(score))
 difficultyScale.setLevel(difficultyLevel) # Visually set active level of difficulty scale to proper difficulty level
+overshootDataLog = []
 resetApple() # Initialize apple (drop interval timer is also reset here)
 gamePlayClock = core.Clock() # Effectively starts the game play timer
 
@@ -770,6 +816,10 @@ participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'P
 # Write all participant data collected over the duration of the experiment to csv files
 participantDataToCsv()
 
+# Write the overshoot log to a csv file
+createOvershootLogCsv()
+
+# Write the frame log to a csv file
 createFrameLogCsv()
 
 # Display end screen
