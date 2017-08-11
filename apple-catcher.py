@@ -229,7 +229,11 @@ optionsBox = visual.Rect(win, fillColor = 'grey', width = optionsBoxWidth, heigh
 difficultyScale = tools.Scale(win, scaleColor = 'white', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0.6, optionsBoxPosY), opacity = 0.3)
 
 # Score display
-scoreDisplay = visual.TextStim(win, text = 'Score: 0', color = 'white', height = 0.1, pos = (0, optionsBoxPosY))
+scoreDisplay = visual.TextStim(win, text = 'Score: 0', color = 'white', height = 0.08, pos = (0, optionsBoxPosY + 0.04))
+
+# Fake high score
+highScore = 1749
+highScoreDisplay =  visual.TextStim(win, text = 'High score: ' + str(highScore), color = 'red', height = 0.05, pos = (0, optionsBoxPosY - 0.04))
 
 # Game Timer Visual
 timerStim = visual.TextStim(win, text = "", color = 'white', height = 0.1, pos = (0, 0.9))
@@ -469,6 +473,7 @@ def drawCommonGameGraphics():
 	basket.draw()
 	optionsBox.draw()
 	scoreDisplay.draw()
+	highScoreDisplay.draw()
 
 # Play practise trial for participant
 def playPractise():
