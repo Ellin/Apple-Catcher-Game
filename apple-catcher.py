@@ -70,8 +70,8 @@ appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
-practisePlayLength = 30 # Practise play time (excluding pauses)
-gamePlayLength = 50 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 1 # Practise play time (excluding pauses)
+gamePlayLength = 1 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -101,10 +101,10 @@ psProbeSubmitButtonText = visual.TextStim(win, text = 'Submit', color = 'black',
 psProbeSubmitButton = tools.Button(psProbeSubmitButtonBox, mouse)
 psProbeSubmitButtonClicked = False
 psProbeSubmitError = False
-psProbeSubmitErrorMsg = visual.TextStim(win, wrapWidth = 1.8, text = 'Please select an answer for all the questions.', color = 'red', height = 0.08, pos = (0, -0.2))
+psProbeSubmitErrorMsg = visual.TextStim(win, wrapWidth = 1.6, text = 'Please select an answer for all the questions.', color = 'red', height = 0.08, pos = (0, -0.2))
 
 # Practise Trial Instruction Screen
-practiseInstructions = visual.TextStim(win, wrapWidth = 2, text = "Before you start the game, you will have about a minute to practise. Catch as many apples as you can by dragging the basket. Try changing the difficulty of the game by pressing pause to adjust the difficulty level using the scale in the bottom right corner of the screen. Press next to start the practise round.", color = 'black', height = 0.08)
+practiseInstructions = visual.TextStim(win, wrapWidth = 1.6, text = "Before you start the game, you will have about a minute to practise. Catch as many apples as you can by dragging the basket. Try changing the difficulty of the game by pressing pause to adjust the difficulty level using the scale in the bottom right corner of the screen. Level 1 is the easiest and level 7 is the hardest. Press next to start the practise round.", color = 'black', height = 0.08, pos = (0, 0.3))
 practiseButtonBoxPosX = 0
 practiseButtonBoxPosY = -0.5
 practiseButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (practiseButtonBoxPosX, practiseButtonBoxPosY))
@@ -113,15 +113,15 @@ practiseButton = tools.Button(practiseButtonBox, mouse)
 
 # Game Instruction screen
 if condition == 1:
-	gameInstructionsText = 'Condition 1 instructions: You have finished the practise round. Like in the practise round, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. If you want the game to be more difficult, press the right arrow button. If you want the game to be less difficult, press the left arrow button. Press start when you are ready to play.'
+	gameInstructionsText = 'Condition 1 instructions: You have finished the practise round. Like in the practise round, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. Level 1 is the easiest and level 7 is the hardest. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.5
 elif condition == 2:
-	gameInstructionsText = 'Condition 2 instructions: You have finished the practise round. Before you start the game, choose how difficult you want the game to be using the scale below. Unlike the practise round, you will *not* be able to change the difficulty of the game once you start. Press start when you are ready to play.'
+	gameInstructionsText = 'Condition 2 instructions: You have finished the practise round. Before you start the game, choose how difficult you want the game to be using the scale below. Level 1 is the easiest and level 7 is the hardest. Unlike the practise round, you will *not* be able to change the difficulty of the game once you start. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.75
 elif condition == 3:
 	gameInstructionsText = 'Condition 3 instructions: You have finished the practise round. Unlike the practise round, you will *not* be able to change the difficulty level of the game. The difficulty of the game may or may not change as you play, but you will not be able to choose when these changes happen. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.5
-gameInstructions = visual.TextStim(win, wrapWidth = 2, text = gameInstructionsText, color = 'black', height = 0.08)
+gameInstructions = visual.TextStim(win, wrapWidth = 1.6, text = gameInstructionsText, color = 'black', height = 0.08, pos = (0, 0.3))
 difficultyScaleCond2 = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5)) # Difficulty scale for condition 2 where participants set their difficulty level for the game
 startButtonBoxPosX = 0
 startButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (startButtonBoxPosX, startButtonBoxPosY))
@@ -129,7 +129,7 @@ startButtonText = visual.TextStim(win, text = 'start', color = 'black', height =
 startButton = tools.Button(startButtonBox, mouse)
 
 # Probe Instruction Screen
-probeInstructions = visual.TextStim(win, wrapWidth = 1.8, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them.', color = 'black', height = 0.08, pos = (0, 0.5))
+probeInstructions = visual.TextStim(win, wrapWidth = 1.6, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them.', color = 'black', height = 0.08, pos = (0, 0.5))
 probeStartButtonBoxPosX = 0
 probeStartButtonBoxPosY = 0
 probeStartButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
