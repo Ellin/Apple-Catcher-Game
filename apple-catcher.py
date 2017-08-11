@@ -70,8 +70,8 @@ appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
-practisePlayLength = 5 # Practise play time (excluding pauses)
-gamePlayLength = 15 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 1 # Practise play time (excluding pauses)
+gamePlayLength = 120 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -380,7 +380,7 @@ def resetApple():
 	dropIntervalClock.reset()
 	applePosY = appleStartPosY
 	applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
-	while abs(applePosX - basketPosX) < basketWidth + appleWidth/2.0: # Make sure the new apple drops at least a basket width + half the apple's width away from the participant's basket to force the participant to move at least half a basket width to catch the next apple
+	while abs(applePosX - basketPosX) < (basketWidth/2.0 + basketWidth + appleWidth/2.0): # Make sure the new apple drops at least a certain distance from the basket to prevent any default hits or default near misses (new apple should fall greater than half a basket width + basket width + half the apple's width from the participant's basket to force the participant to move their basket to get a hit/near miss)
 		applePosX = random.uniform(leftGameAreaEdge + appleWidth/2.0, rightGameAreaEdge - appleWidth/2.0)
 	apple.setPos([applePosX, applePosY])
 	appleNum += 1
