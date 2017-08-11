@@ -70,8 +70,8 @@ appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
-practisePlayLength = 1 # Practise play time (excluding pauses)
-gamePlayLength = 1 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 5 # Practise play time (excluding pauses)
+gamePlayLength = 15 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -451,7 +451,7 @@ def logAppleCatchData():
 def logOvershootData():
 	applePosX = apple.pos[0]
 	overshoot = abs(applePosX - endBasketPosX)
-	overshootDataLog.append({'Level': difficultyLevel, 'Apple #': appleNum, 'Catch Status': catchStatus, 'Overshoot': overshoot, 'Start Basket Pos X': startBasketPosX, 'End Basket Pos X': endBasketPosX, 'Apple Pos X': applePosX})
+	overshootDataLog.append({'Level': difficultyLevel, 'Apple #': appleNum, 'Catch Status (1 = hit, 2 = near miss, 3 = miss)': catchStatus, 'Overshoot': overshoot, 'Start Basket Pos X': startBasketPosX, 'End Basket Pos X': endBasketPosX, 'Apple Pos X': applePosX})
 
 # For every frame, log the following game data: Time (actual time, not game timer), Frame, Level, Game Paused (1 = game is paused), Apple #, Basket Pos X, Basket Pos Y, Apple Pos X, Apple Pos Y
 def logFrameData():
@@ -571,7 +571,7 @@ def createOvershootLogCsv():
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Level', 'Apple #', 'Catch Status', 'Overshoot', 'Start Basket Pos X', 'End Basket Pos X', 'Apple Pos X']
+	column_labels = ['Level', 'Apple #', 'Catch Status (1 = hit, 2 = near miss, 3 = miss)', 'Overshoot', 'Start Basket Pos X', 'End Basket Pos X', 'Apple Pos X']
 	with open(outputFilePath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
