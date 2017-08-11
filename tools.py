@@ -252,7 +252,7 @@ class Scale(object):
 
 class BoxScale(object):
 	"""docstring for BoxScale.. units in norm"""
-	def __init__(self, win, boxLineColor, boxFillColor, textColor, activeFillColor, activeTextColor, defaultRating, width, height, pos, opacity = 1):
+	def __init__(self, win, boxLineColor, boxFillColor, textColor, activeFillColor, activeTextColor, width, height, pos, defaultRating = 'none', opacity = 1):
 		self.win = win
 		self.boxLineColor = boxLineColor
 		self.boxFillColor = boxFillColor
@@ -308,62 +308,70 @@ class BoxScale(object):
 		self.ratingDict = {1: {'box': self.box1, 'label': self.box1Label}, 2: {'box': self.box2, 'label': self.box2Label}, 3: {'box': self.box3, 'label': self.box3Label}, 4: {'box': self.box4, 'label': self.box4Label}, 5: {'box': self.box5, 'label': self.box5Label}, 6: {'box': self.box6, 'label': self.box6Label}, 7: {'box': self.box7, 'label': self.box7Label}}
 		
 		# Set active colors
-		self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
-		self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
+		if defaultRating != 'none':
+			self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
+			self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 
 	def hasRatingChanged(self):
 		if self.box1button.isClicked():
 			if self.activeRating != 1:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 1
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 				return True
 		if self.box2button.isClicked():
 			if self.activeRating != 2:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 2
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 				return True
 		if self.box3button.isClicked():
 			if self.activeRating != 3:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 3
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 				return True
 		if self.box4button.isClicked():
 			if self.activeRating != 4:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 4
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 				return True
 		if self.box5button.isClicked():
 			if self.activeRating != 5:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 5
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 				return True
 		if self.box6button.isClicked():
 			if self.activeRating != 6:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 6
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor
 				return True
 		if self.box7button.isClicked():
 			if self.activeRating != 7:
-				self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
-				self.ratingDict[self.activeRating]['label'].color = self.textColor
+				if self.activeRating != "none":
+					self.ratingDict[self.activeRating]['box'].fillColor = self.boxFillColor
+					self.ratingDict[self.activeRating]['label'].color = self.textColor
 				self.activeRating = 7
 				self.ratingDict[self.activeRating]['box'].fillColor = self.activeFillColor
 				self.ratingDict[self.activeRating]['label'].color = self.activeTextColor

@@ -70,8 +70,8 @@ appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
-practisePlayLength = 5 # Practise play time (excluding pauses)
-gamePlayLength = 8 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 2 # Practise play time (excluding pauses)
+gamePlayLength = 2 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -87,18 +87,21 @@ psProbeStartButton = tools.Button(psProbeStartButtonBox, mouse)
 # Pre-Study Probe Screen
 psQ1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored are you right now?', color = 'black', height = 0.08, pos = (-0.9, 0.7))
 psQ2 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated are you for this task?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
-psQ1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.7))
-psQ2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.4))
+psQ1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.7))
+psQ2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.4))
 psLikertLabel1 = visual.TextStim(win, text = 'Not at all', color = 'black', height = 0.07, pos = (0.2, 0.9))
 psLikertLabel2 = visual.TextStim(win, text = 'Neutral', color = 'black', height = 0.07, pos = (0.5, 0.9))
 psLikertLabel3 = visual.TextStim(win, text = 'Extremely', color = 'black', height = 0.07, pos = (0.8, 0.9))
-psQ1Answer = 4 # Default answer is 4 (middle of the scale)
-psQ2Answer = 4
+psQ1Answer = 'none' # Default answer (before participant chooses an answer) is none 
+psQ2Answer = 'none'
 psProbeSubmitButtonBoxPosX = 0
 psProbeSubmitButtonBoxPosY = -0.8
 psProbeSubmitButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (psProbeSubmitButtonBoxPosX, psProbeSubmitButtonBoxPosY))
 psProbeSubmitButtonText = visual.TextStim(win, text = 'Submit', color = 'black', height = 0.08, pos = (psProbeSubmitButtonBoxPosX, psProbeSubmitButtonBoxPosY))
 psProbeSubmitButton = tools.Button(psProbeSubmitButtonBox, mouse)
+psProbeSubmitButtonClicked = False
+psProbeSubmitError = False
+psProbeSubmitErrorMsg = visual.TextStim(win, wrapWidth = 1.8, text = 'Please select an answer for all the questions.', color = 'red', height = 0.08, pos = (0, -0.2))
 
 # Practise Trial Instruction Screen
 practiseInstructions = visual.TextStim(win, wrapWidth = 2, text = "Before you start the game, you will have about a minute to practise. Catch as many apples as you can by dragging the basket. Try changing the difficulty of the game by pressing pause to adjust the difficulty level using the scale in the bottom right corner of the screen. Press next to start the practise round.", color = 'black', height = 0.08)
@@ -139,24 +142,28 @@ q2 = visual.TextStim(win, alignHoriz = 'left', text = 'How frustrated were you d
 q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.1))
 q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How challenging did you find this study?', color = 'black', height = 0.08, pos = (-0.9, -0.2))
 q5 = visual.TextStim(win, alignHoriz = 'left', text = 'How in control did you feel during this study?', color = 'black', height = 0.08, pos = (-0.9, -0.5))
-q1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.7))
-q2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.4))
-q3Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, 0.1))
-q4Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, -0.2))
-q5Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', defaultRating = 4, width = 0.7, height = 0.15, pos = (0.5, -0.5))
+q1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.7))
+q2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.4))
+q3Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.1))
+q4Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, -0.2))
+q5Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, -0.5))
 likertLabel1 = visual.TextStim(win, text = 'Not at all', color = 'black', height = 0.07, pos = (0.2, 0.9))
 likertLabel2 = visual.TextStim(win, text = 'Neutral', color = 'black', height = 0.07, pos = (0.5, 0.9))
 likertLabel3 = visual.TextStim(win, text = 'Extremely', color = 'black', height = 0.07, pos = (0.8, 0.9))
-q1Answer = 4 # Default answer is 4 (middle of the scale)
-q2Answer = 4
-q3Answer = 4
-q4Answer = 4
-q5Answer = 4
+q1Answer = 'none' # Default answer (before participant chooses an answer) is none 
+q2Answer = 'none'
+q3Answer = 'none'
+q4Answer = 'none'
+q5Answer = 'none'
 probeSubmitButtonBoxPosX = 0
 probeSubmitButtonBoxPosY = -0.8
 probeSubmitButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeSubmitButtonBoxPosX, probeSubmitButtonBoxPosY))
 probeSubmitButtonText = visual.TextStim(win, text = 'Submit', color = 'black', height = 0.08, pos = (probeSubmitButtonBoxPosX, probeSubmitButtonBoxPosY))
 probeSubmitButton = tools.Button(probeSubmitButtonBox, mouse)
+probeSubmitButtonClicked = False
+probeSubmitError = False
+probeSubmitErrorMsg = visual.TextStim(win, wrapWidth = 0.5, text = 'Please select an answer for all the questions.', color = 'red', height = 0.08, pos = (0.5, probeSubmitButtonBoxPosY))
+
 
 # End Screen
 endText = visual.TextStim(win, wrapWidth = 2, text = 'This is the end of the study. Please get the experimenter.', color = 'black', height = 0.08)
@@ -242,6 +249,9 @@ def displayPSProbeInstructions(): # display pre-study probe instructions
 def displayPSProbe(): # display pre-study probe screen
 	global psQ1Answer
 	global psQ2Answer
+	global psProbeSubmitError
+	global psProbeSubmitButtonClicked
+
 	psQ1.draw()
 	psQ2.draw()
 	psLikertLabel1.draw()
@@ -255,6 +265,14 @@ def displayPSProbe(): # display pre-study probe screen
 	psQ2Scale.draw()
 	psProbeSubmitButtonBox.draw()
 	psProbeSubmitButtonText.draw()
+
+	psProbeSubmitButtonClicked = psProbeSubmitButton.isClicked() # Track whether the submit button has been clicked
+
+	# Display error message to participant if the participant tries to click the submit button without selecting an answer for all the questions
+	if psProbeSubmitButtonClicked and (psQ1Answer == 'none' or psQ2Answer == 'none'):
+		psProbeSubmitError = True
+	if psProbeSubmitError:
+		psProbeSubmitErrorMsg.draw()
 
 def displayGameInstructions():
 	gameInstructions.draw()
@@ -660,6 +678,9 @@ def displayProbe():
 	global q3Answer
 	global q4Answer
 	global q5Answer
+	global probeSubmitButtonClicked
+	global probeSubmitError
+
 	q1.draw()
 	q2.draw()
 	q3.draw()
@@ -686,6 +707,14 @@ def displayProbe():
 	probeSubmitButtonBox.draw()
 	probeSubmitButtonText.draw()
 
+	probeSubmitButtonClicked = probeSubmitButton.isClicked() # Track whether the submit button has been clicked
+
+	# Display error message to participant if the participant tries to click the submit button without selecting an answer for all the questions
+	if probeSubmitButtonClicked and (q1Answer == 'none' or q2Answer == 'none' or q3Answer == 'none' or q4Answer == 'none' or q5Answer == 'none'):
+		probeSubmitError = True
+	if probeSubmitError:
+		probeSubmitErrorMsg.draw()
+
 #################################### START EXPERIMENT ####################################
 #win.setRecordFrameIntervals(True)
 
@@ -702,7 +731,7 @@ while not psProbeStartButton.isClicked():
 	win.flip()
 
 # Display pre-study probe screen
-while not psProbeSubmitButton.isClicked():
+while not psProbeSubmitButtonClicked or psQ1Answer == 'none' or psQ2Answer == 'none':
 	displayPSProbe()
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
@@ -804,7 +833,7 @@ while not probeStartButton.isClicked():
 	win.flip()
 
 # Display screen containing the probes
-while not probeSubmitButton.isClicked():
+while not probeSubmitButtonClicked or q1Answer == 'none' or q2Answer == 'none' or q3Answer == 'none' or q4Answer == 'none' or q5Answer == 'none':
 	displayProbe()
 	if event.getKeys(keyList = ['q','escape']):
 		core.quit()
