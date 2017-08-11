@@ -70,8 +70,8 @@ appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
-practisePlayLength = 2 # Practise play time (excluding pauses)
-gamePlayLength = 2 # Play time (excluding pauses) should max out at 10 minutes
+practisePlayLength = 30 # Practise play time (excluding pauses)
+gamePlayLength = 50 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -203,13 +203,13 @@ apple = visual.ImageStim(win, image = appleImg, size = (appleWidth, appleHeight)
 # Apple animation settings 
 difficultyLevel = 4 # Initial setting
 difficultyDict = { # difficultyDict is a dictionary containing a dictionary of 'interval' & 'drop time' settings associated with each difficulty level
-	1: {'interval': 4, 'drop time': 8}, 
-	2: {'interval': 3, 'drop time': 6}, 
-	3: {'interval': 2, 'drop time': 4}, 
-	4: {'interval': 1, 'drop time': 2},  
-	5: {'interval': 0.5, 'drop time': 1}, 
-	6: {'interval': 0.25, 'drop time': 0.5}, 
-	7: {'interval': 0, 'drop time': 0.25}}
+	1: {'interval': 0.6, 'drop time': 1.4}, 
+	2: {'interval': 0.5, 'drop time': 1.25}, 
+	3: {'interval': 0.4, 'drop time': 1.1}, 
+	4: {'interval': 0.3, 'drop time': 0.95},  
+	5: {'interval': 0.2, 'drop time': 0.8}, 
+	6: {'interval': 0.1, 'drop time': 0.65}, 
+	7: {'interval': 0, 'drop time': 0.5}}
 dropIntervalLength = difficultyDict[difficultyLevel]['interval'] # Unit = seconds. Time (excluding pauses) between apple drops from when last apple hit the ground to when the next apple drops
 appleDropTime = difficultyDict[difficultyLevel]['drop time'] # Unit = seconds. The time it takes for an apple to hit the ground.
 appleDecrement = gameAreaHeight/(frameRate*appleDropTime) # The decrement is how much down the screen the apple should drop per frame
