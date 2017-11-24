@@ -71,7 +71,7 @@ catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
 practisePlayLength = 1 # Practise play time (excluding pauses)
-gamePlayLength = 120 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 5 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -129,7 +129,7 @@ startButtonText = visual.TextStim(win, text = 'start', color = 'black', height =
 startButton = tools.Button(startButtonBox, mouse)
 
 # Probe Instruction Screen
-probeInstructions = visual.TextStim(win, wrapWidth = 1.6, text = 'We now have a couple questions about your experience of this study. On the following screen, you will see the questions with rating scales next to them.', color = 'black', height = 0.08, pos = (0, 0.5))
+probeInstructions = visual.TextStim(win, wrapWidth = 1.6, text = 'We now have a couple questions about your experience of the game. On the following screen, you will see the questions with rating scales next to them.', color = 'black', height = 0.08, pos = (0, 0.5))
 probeStartButtonBoxPosX = 0
 probeStartButtonBoxPosY = 0
 probeStartButtonBox = visual.Rect(win, lineColor = 'black', fillColor = 'grey', width = 0.3, height = 0.15, pos = (probeStartButtonBoxPosX, probeStartButtonBoxPosY))
@@ -137,11 +137,11 @@ probeStartButtonText = visual.TextStim(win, text = 'Next', color = 'black', heig
 probeStartButton = tools.Button(probeStartButtonBox, mouse)
 
 # Probe Screen
-q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.7))
-q2 = visual.TextStim(win, alignHoriz = 'left', text = 'How frustrated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
-q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during this study?', color = 'black', height = 0.08, pos = (-0.9, 0.1))
-q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How challenging did you find this study?', color = 'black', height = 0.08, pos = (-0.9, -0.2))
-q5 = visual.TextStim(win, alignHoriz = 'left', text = 'How in control did you feel during this study?', color = 'black', height = 0.08, pos = (-0.9, -0.5))
+q1 = visual.TextStim(win, alignHoriz = 'left', text = 'How bored were you during the game?', color = 'black', height = 0.08, pos = (-0.9, 0.7))
+q2 = visual.TextStim(win, alignHoriz = 'left', text = 'How frustrated were you during the game?', color = 'black', height = 0.08, pos = (-0.9, 0.4))
+q3 = visual.TextStim(win, alignHoriz = 'left', text = 'How motivated were you during the game?', color = 'black', height = 0.08, pos = (-0.9, 0.1))
+q4 = visual.TextStim(win, alignHoriz = 'left', text = 'How difficult did you find the game?', color = 'black', height = 0.08, pos = (-0.9, -0.2))
+q5 = visual.TextStim(win, alignHoriz = 'left', text = 'How in control did you feel during the game?', color = 'black', height = 0.08, pos = (-0.9, -0.5))
 q1Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.7))
 q2Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.4))
 q3Scale = tools.BoxScale(win, boxLineColor = 'black', boxFillColor = 'lightgrey', textColor = 'black', activeFillColor = 'white', activeTextColor = 'red', width = 0.7, height = 0.15, pos = (0.5, 0.1))
