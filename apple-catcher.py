@@ -29,6 +29,8 @@ handedness = participantDlg.data[2]
 condition = int(participantDlg.data[3])
 yokeID = participantDlg.data[4] # The participant ID that the game is yoked to (relevant only for condition 2)
 participantDataDict = {'ID': participantID, 'Gender': gender, 'Handedness': handedness, 'Condition': condition}
+if condition == 3 or condition == 4:
+	participantDataDict.update({'Yoke ID': yokeID})
 
 # Generate window
 win = visual.Window(fullscr = True, color = 'white', units = 'norm')
@@ -700,7 +702,10 @@ def participantDataToCsv():
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+	if condition == 1 or condition == 2:
+		column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+	elif condition == 3 or condition == 4:
+		column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
