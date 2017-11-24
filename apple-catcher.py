@@ -7,6 +7,7 @@ import tools
 # Condition 1: Can pause to change difficulty levels at any time
 # Condition 2: Can set difficulty level once at the beginning
 # Condition 3: Difficulty level changes are yoked to condition 1
+# Condition 4: Difficulty level is yoked to condition 2.
 
 # Get participant's name, age, gender via a dialog box
 participantDlg = gui.Dlg()
@@ -113,13 +114,16 @@ practiseButton = tools.Button(practiseButtonBox, mouse)
 
 # Game Instruction screen
 if condition == 1:
-	gameInstructionsText = 'Condition 1 instructions: You have finished the practise round. Like in the practise round, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. Level 1 is the easiest and level 7 is the hardest. Press start when you are ready to play.'
+	gameInstructionsText = 'You have finished the practise round. Like in the practise round, you will be able to change the difficulty level at any time to suit your preference by pressing the pause button to activate the difficulty scale in the bottom right corner. Level 1 is the easiest and level 7 is the hardest. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.5
 elif condition == 2:
-	gameInstructionsText = 'Condition 2 instructions: You have finished the practise round. Before you start the game, choose how difficult you want the game to be using the scale below. Level 1 is the easiest and level 7 is the hardest. Unlike the practise round, you will *not* be able to change the difficulty of the game once you start. Press start when you are ready to play.'
+	gameInstructionsText = 'You have finished the practise round. Before you start the game, choose how difficult you want the game to be using the scale below. Level 1 is the easiest and level 7 is the hardest. Unlike the practise round, you will *not* be able to change the difficulty of the game once you start. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.75
 elif condition == 3:
-	gameInstructionsText = 'Condition 3 instructions: You have finished the practise round. Unlike the practise round, you will *not* be able to change the difficulty level of the game. The difficulty of the game may or may not change as you play, but you will not be able to choose when these changes happen. Press start when you are ready to play.'
+	gameInstructionsText = 'You have finished the practise round. Unlike the practise round, you will *not* be able to change the difficulty level of the game. The difficulty of the game may or may not change as you play, but you will not be able to choose when these changes happen. Press start when you are ready to play.'
+	startButtonBoxPosY = -0.5
+elif condition == 4:
+	gameInstructionsText = 'You have finished the practise round. Unlike the practise round, you will *not* be able to change the difficulty level of the game. The difficulty of the game may or may not change as you play, but you will not be able to choose when these changes happen. Press start when you are ready to play.'
 	startButtonBoxPosY = -0.5
 gameInstructions = visual.TextStim(win, wrapWidth = 1.6, text = gameInstructionsText, color = 'black', height = 0.08, pos = (0, 0.3))
 difficultyScaleCond2 = tools.Scale(win, scaleColor = 'black', activeColor = 'red', startLevel = 4, width = 0.5, height = 0.05, pos = (0, -0.5)) # Difficulty scale for condition 2 where participants set their difficulty level for the game
@@ -560,6 +564,15 @@ def playCond3():
 	drawCommonGameGraphics()
 	timerStim.draw()
 
+def playCond4():
+	moveBasket()
+	if (applePosY != appleStartPosY) or (dropIntervalClock.getTime() >= dropIntervalLength): # This allows the apple to start its drop only after the drop interval has passed. If the drop interval is changed mid-fall, then the apple continues falling.
+		updateApple()
+
+	updateTimerText()
+	drawCommonGameGraphics()
+	timerStim.draw()
+
 # Create a csv file from overshootDataLog 
 def createOvershootLogCsv():
 	if condition == 1:
@@ -568,6 +581,8 @@ def createOvershootLogCsv():
 		outputFolderName = 'Overshoot-Data-Logs_Condition-2'
 	elif condition == 3:
 		outputFolderName = 'Overshoot-Data-Logs_Condition-3'
+	elif condition == 4:
+		outputFolderName = 'Overshoot-Data-Logs_Condition-4'
 
 	outputFileName = participantID + '.csv'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
@@ -591,6 +606,8 @@ def createFrameLogCsv():
 		outputFolderName = 'Frame-Data-Logs_Condition-2'
 	elif condition == 3:
 		outputFolderName = 'Frame-Data-Logs_Condition-3'
+	elif condition == 4:
+		outputFolderName = 'Frame-Data-Logs_Condition-4'
 
 	outputFileName = participantID + '.csv'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
@@ -634,6 +651,33 @@ def changeLogCsvToDict():
 		for row in reader:
 			levelDataLog.append({'Level Change Time': float(row['Level Change Time']), 'Level': int(row['Level'])})
 
+# Create a csv file containing the difficulty level that the participant in Condition 2 chose. Used only in Condition 2 to save the participant's level choice to a csv (which will later be used for yoking in Condition 4).
+def createCond2LevelCsv():
+	outputFileName = participantID + '.csv'
+	outputFolderName = 'Condition-2_Level-Logs'
+	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
+
+	# If the output folder does not exist, create it
+	if not os.path.exists(outputFolderName):
+		os.makedirs(outputFolderName)
+
+	column_labels = ['Level']
+	with open(outputFilePath, 'wb') as new_csvfile:
+		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
+		writer.writeheader()
+		writer.writerow({'Level': difficultyLevel})
+
+# Gets the level choice of the participant in Condition 2 that the current participant in Condition 4 is yoked to. Used only in Condition 4 for yoking.
+def getYokedLevel():
+	inputFileName = yokeID + '.csv'
+	inputFolderName = 'Condition-2_Level-Logs'
+	inputFilePath = os.path.join(os.getcwd(), inputFolderName, inputFileName)
+	with open(inputFilePath) as csvfile:
+		reader = csv.DictReader(csvfile)
+		for row in reader:
+			yokedLevel = int(row['Level'])
+		return yokedLevel
+
 # Write participant data to two csv files (individual participant file and master file with data of all participants of the same condition)
 def participantDataToCsv():
 	if condition == 1:
@@ -645,6 +689,9 @@ def participantDataToCsv():
 	elif condition == 3:
 		outputFolderName = 'Individual-Participant-Data_Condition-3'
 		masterFileName = 'Master-Participant-Data_Condition-3.csv'
+	elif condition == 4:
+		outputFolderName = 'Individual-Participant-Data_Condition-4'
+		masterFileName = 'Master-Participant-Data_Condition-4.csv'
 
 	outputFileName = 'PID' + '-'+ participantID + '_' + date + '_' + strftime('%H%M%S') + '.csv' # file name format for individual participant data files
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName) # filepath for individual participant data files
@@ -774,6 +821,8 @@ while not startButton.isClicked():
 # If Condition 1 or 3, reset difficulty level of game back to 4 (in Condition 2, participant chooses the difficulty level via a scale in the game instructions screen)
 if condition == 1 or condition == 3:
 	changeDifficulty(4)
+elif condition == 4:
+	changeDifficulty(getYokedLevel()) # If Condition 4, yoke the difficulty level 
 
 # If Condition 3, get the time that the next level change should occur
 if condition == 3:
@@ -817,12 +866,23 @@ elif condition == 2:
 		frameNum += 1
 		mouse.clickReset()
 		win.flip()
+	createCond2LevelCsv() # Write participant's level choice into a csv
 elif condition == 3:
 	levelDataLog[i].update({'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
 			core.quit()
 		playCond3()
+		logFrameData()
+		frameNum += 1
+		mouse.clickReset()
+		win.flip()
+elif condition == 4:
+	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
+	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
+		if event.getKeys(keyList = ['q','escape']):
+			core.quit()
+		playCond4()
 		logFrameData()
 		frameNum += 1
 		mouse.clickReset()
