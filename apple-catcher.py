@@ -9,11 +9,11 @@ import tools
 # Condition 3: Difficulty level changes are yoked to condition 1
 # Condition 4: Difficulty level is yoked to condition 2.
 
-# Get participant's name, age, gender via a dialog box
+# Get participant's Sona ID, participant #, and handedness via a dialog box
 participantDlg = gui.Dlg()
-participantDlg.addField('ID:')
+participantDlg.addField('SONA ID:')
 participantDlg.addText('                                                                                                               ')
-participantDlg.addField('Gender:', choices = ['Female', 'Male', 'Other'])
+participantDlg.addField('Participant #')
 participantDlg.addText('                                                                                                               ')
 participantDlg.addField('Handedness:', choices = ['Right', 'Left'])
 participantDlg.addText('                                                                                                               ')
@@ -23,12 +23,12 @@ participantDlg.addField('Version:')
 participantDlg.addText('                                                                                                               ')
 participantDlg.show()
 
-participantID = participantDlg.data[0]
-gender = participantDlg.data[1]
+sonaID = participantDlg.data[0]
+participantNum = participantDlg.data[1]
 handedness = participantDlg.data[2]
 condition = int(participantDlg.data[3])
-yokeID = participantDlg.data[4] # The participant ID that the game is yoked to (relevant only for condition 2)
-participantDataDict = {'ID': participantID, 'Gender': gender, 'Handedness': handedness, 'Condition': condition}
+yokeID = participantDlg.data[4] # The participant # that the game is yoked to (relevant only for condition 3 & 4)
+participantDataDict = {'SONA ID': sonaID, 'Participant #': participantNum, 'Handedness': handedness, 'Condition': condition}
 if condition == 3 or condition == 4:
 	participantDataDict.update({'Yoke ID': yokeID})
 
@@ -74,7 +74,7 @@ catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 
 # Time variables (Unit = seconds)
 practisePlayLength = 1 # Practise play time (excluding pauses)
-gamePlayLength = 5 # Play time (excluding pauses) should max out at 10 minutes
+gamePlayLength = 7 # Play time (excluding pauses) should max out at 10 minutes
 dropIntervalClock = core.Clock()
 pauseClock = core.Clock()
 
@@ -470,7 +470,7 @@ def logFrameData():
 	basketPosY = basket.pos[1]
 	applePosX = apple.pos[0]
 	applePosY = apple.pos[1]
-	frameDataLog.append({'Time': time, 'Frame': frameNum, 'Game Paused': gamePaused, 'Level': difficultyLevel, 'Apple #': appleNum, 'Basket Pos X': basketPosX, 'Basket Pos Y': basketPosY, 'Apple Pos X': applePosX, 'Apple Pos Y': applePosY})
+	frameDataLog.append({'SONA ID': sonaID, 'Time': time, 'Frame': frameNum, 'Game Paused': gamePaused, 'Level': difficultyLevel, 'Apple #': appleNum, 'Basket Pos X': basketPosX, 'Basket Pos Y': basketPosY, 'Apple Pos X': applePosX, 'Apple Pos Y': applePosY})
 
 # Draw game graphics common to practise trial and all conditions
 def drawCommonGameGraphics():
@@ -586,7 +586,7 @@ def createOvershootLogCsv():
 	elif condition == 4:
 		outputFolderName = 'Overshoot-Data-Logs_Condition-4'
 
-	outputFileName = participantID + '.csv'
+	outputFileName = sonaID + '.csv'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
 
 	# If the output folder does not exist, create it
@@ -611,14 +611,14 @@ def createFrameLogCsv():
 	elif condition == 4:
 		outputFolderName = 'Frame-Data-Logs_Condition-4'
 
-	outputFileName = participantID + '.csv'
+	outputFileName = sonaID + '.csv'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
 
 	# If the output folder does not exist, create it
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Time', 'Frame', 'Game Paused', 'Level', 'Apple #', 'Basket Pos X', 'Basket Pos Y', 'Apple Pos X', 'Apple Pos Y']
+	column_labels = ['SONA ID', 'Time', 'Frame', 'Game Paused', 'Level', 'Apple #', 'Basket Pos X', 'Basket Pos Y', 'Apple Pos X', 'Apple Pos Y']
 	with open(outputFilePath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
@@ -627,7 +627,7 @@ def createFrameLogCsv():
 
 # Create a csv file containing level change data. Used only in Condition 1 to save the participant's level changes to a csv (which will later be used for yoking in Condition 3).
 def createChangeLogCsv():
-	outputFileName = participantID + '.csv'
+	outputFileName = participantNum + '.csv'
 	outputFolderName = 'Condition-1_Level-Change-Logs'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
 
@@ -655,7 +655,7 @@ def changeLogCsvToDict():
 
 # Create a csv file containing the difficulty level that the participant in Condition 2 chose. Used only in Condition 2 to save the participant's level choice to a csv (which will later be used for yoking in Condition 4).
 def createCond2LevelCsv():
-	outputFileName = participantID + '.csv'
+	outputFileName = participantNum + '.csv'
 	outputFolderName = 'Condition-2_Level-Logs'
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName)
 
@@ -695,7 +695,7 @@ def participantDataToCsv():
 		outputFolderName = 'Individual-Participant-Data_Condition-4'
 		masterFileName = 'Master-Participant-Data_Condition-4.csv'
 
-	outputFileName = 'PID' + '-'+ participantID + '_' + date + '_' + strftime('%H%M%S') + '.csv' # file name format for individual participant data files
+	outputFileName = 'PID' + '-'+ participantNum + '_' + date + '_' + strftime('%H%M%S') + '.csv' # file name format for individual participant data files
 	outputFilePath = os.path.join(os.getcwd(), outputFolderName, outputFileName) # filepath for individual participant data files
 
 	# If the output folder does not exist, create it
@@ -703,9 +703,9 @@ def participantDataToCsv():
 		os.makedirs(outputFolderName)
 
 	if condition == 1 or condition == 2:
-		column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 	elif condition == 3 or condition == 4:
-		column_labels = ['Date', 'Time', 'ID', 'Gender', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
