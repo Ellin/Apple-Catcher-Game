@@ -71,6 +71,8 @@ nearMisses = 0 # A 'near miss' is when an apple falls within a 3 basket width ra
 misses = 0 # A (complete) 'miss' is when an apple falls outside of the near miss range
 appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
+levelChangeTime = 0 # The game time when the level is changed
+prevLevelChangeTime = 0 # Keeps track of the previous level change time
 
 # Time variables (Unit = seconds)
 practisePlayLength = 1 # Practise play time (excluding pauses)
@@ -443,6 +445,9 @@ def logAppleCatchData():
 	global hits
 	global misses
 	global nearMisses
+	global levelChangeTime
+	global prevLevelChangeTime
+
 	applesDropped = hits + misses + nearMisses
 	if applesDropped > 0:
 		percentHits = (hits/float(applesDropped))*100
@@ -452,7 +457,13 @@ def logAppleCatchData():
 		percentHits = 0
 		percentMisses = 0
 		percentNearMisses = 0
-	levelDataLog[i].update({'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses, '% Hits': percentHits, '% Misses': percentMisses, '% Near Misses': percentNearMisses})
+
+	# Calculate the time spent in level and update the previous level change time
+	levelChangeTime = gamePlayClock.getTime()
+	timeSpentInLevel = levelChangeTime - prevLevelChangeTime
+	prevLevelChangeTime = levelChangeTime
+
+	levelDataLog[i].update({'Time Spent In Level': timeSpentInLevel, 'Apples Dropped': applesDropped, 'Hits': hits, 'Misses': misses, 'Near Misses': nearMisses, '% Hits': percentHits, '% Misses': percentMisses, '% Near Misses': percentNearMisses})
 	hits = 0
 	misses = 0
 	nearMisses = 0
@@ -525,7 +536,7 @@ def playCond1():
 			resumeGame()
 			if levelDataLog[i]['Level'] != difficultyLevel: # Relevant only to Condition 1: If the difficulty level has changed upon resume, update the level data log.
 				logAppleCatchData()
-				levelDataLog.append({'Level Change Time': gamePlayClock.getTime(), 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
+				levelDataLog.append({'Level Change Time': levelChangeTime, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 				i += 1
 
 	drawCommonGameGraphics()
@@ -703,9 +714,9 @@ def participantDataToCsv():
 		os.makedirs(outputFolderName)
 
 	if condition == 1 or condition == 2:
-		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Time Spent In Level', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 	elif condition == 3 or condition == 4:
-		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Time Spent In Level', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -843,6 +854,8 @@ hits = 0
 misses = 0
 nearMisses = 0
 appleNum = 0
+levelChangeTime = 0
+prevLevelChangeTime = 0
 scoreDisplay.setText('Score: ' + str(score))
 difficultyScale.setLevel(difficultyLevel) # Visually set active level of difficulty scale to proper difficulty level
 overshootDataLog = []
