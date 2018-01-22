@@ -471,8 +471,17 @@ def logAppleCatchData():
 # For every apple drop, log the following data: Level, Apple #, Catch status (1=hit/2=near miss/3=miss), Overshoot (distance b/t apple center & basket center when the apple hits the ground/basket in norm units), Start basket x-pos (when apple is at reset position), End basket x-pos (when apple hits ground/basket), Apple x-pos
 def logOvershootData():
 	applePosX = apple.pos[0]
-	overshoot = abs(applePosX - endBasketPosX)
-	overshootDataLog.append({'Level': difficultyLevel, 'Apple #': appleNum, 'Catch Status (1 = hit, 2 = near miss, 3 = miss)': catchStatus, 'Overshoot': overshoot, 'Start Basket Pos X': startBasketPosX, 'End Basket Pos X': endBasketPosX, 'Apple Pos X': applePosX})
+	appleBasketDist = abs(applePosX - endBasketPosX) # Distance between the apple and the end basket
+
+	# Determine overshoot status: perfect, undershoot, or overshoot
+	# Perfect catch = Center of the basket exactly matches the center of the apple, Undershoot = end basket is on the same side of the apple as the start basket, Overshoot = end basket has passed the apple and is now on the other side of the apple compared to where it started
+	if endBasketPosX == applePosX:
+		shootStatus = 'Perfect'
+	elif (startBasketPosX < applePosX and endBasketPosX < applePosX) or (startBasketPosX > applePosX and endBasketPosX > applePosX):
+		shootStatus = 'Undershoot'
+	elif (startBasketPosX < applePosX and endBasketPosX > applePosX) or (startBasketPosX > applePosX and endBasketPosX < applePosX):
+		shootStatus = 'Overshoot'
+	overshootDataLog.append({'Level': difficultyLevel, 'Apple #': appleNum, 'Catch Status (1 = hit, 2 = near miss, 3 = miss)': catchStatus, 'End Distance From Apple': appleBasketDist, 'Shoot Status': shootStatus, 'Start Basket Pos X': startBasketPosX, 'End Basket Pos X': endBasketPosX, 'Apple Pos X': applePosX})
 
 # For every frame, log the following game data: Time (actual time, not game timer), Frame, Level, Game Paused (1 = game is paused), Apple #, Basket Pos X, Basket Pos Y, Apple Pos X, Apple Pos Y
 def logFrameData():
@@ -604,7 +613,7 @@ def createOvershootLogCsv():
 	if not os.path.exists(outputFolderName):
 		os.makedirs(outputFolderName)
 
-	column_labels = ['Level', 'Apple #', 'Catch Status (1 = hit, 2 = near miss, 3 = miss)', 'Overshoot', 'Start Basket Pos X', 'End Basket Pos X', 'Apple Pos X']
+	column_labels = ['Level', 'Apple #', 'Catch Status (1 = hit, 2 = near miss, 3 = miss)', 'End Distance From Apple', 'Shoot Status', 'Start Basket Pos X', 'End Basket Pos X', 'Apple Pos X']
 	with open(outputFilePath, 'wb') as new_csvfile:
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
 		writer.writeheader()
