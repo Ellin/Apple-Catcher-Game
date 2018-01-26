@@ -792,6 +792,12 @@ def displayProbe():
 	if probeSubmitError:
 		probeSubmitErrorMsg.draw()
 
+def writeData():
+	participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'Pre Q2': psQ2Answer,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer})
+	participantDataToCsv()
+	createOvershootLogCsv()
+	createFrameLogCsv()
+
 #################################### START EXPERIMENT ####################################
 #win.setRecordFrameIntervals(True)
 
@@ -876,6 +882,9 @@ if condition == 1:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused:
 		if event.getKeys(keyList = ['q','escape']):
+			logAppleCatchData()
+			writeData()
+			createChangeLogCsv()
 			core.quit()
 		playCond1()
 		logFrameData()
@@ -887,6 +896,9 @@ elif condition == 2:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
+			logAppleCatchData()
+			writeData()
+			createCond2LevelCsv() 
 			core.quit()
 		playCond2()
 		logFrameData()
@@ -898,6 +910,8 @@ elif condition == 3:
 	levelDataLog[i].update({'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
+			logAppleCatchData()
+			writeData()
 			core.quit()
 		playCond3()
 		logFrameData()
@@ -908,6 +922,8 @@ elif condition == 4:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
+			logAppleCatchData()
+			writeData()
 			core.quit()
 		playCond4()
 		logFrameData()
@@ -920,6 +936,7 @@ logAppleCatchData()
 while not probeStartButton.isClicked():
 	displayProbeInstructions()
 	if event.getKeys(keyList = ['q','escape']):
+		writeData()
 		core.quit()
 	mouse.clickReset()
 	win.flip()
@@ -928,6 +945,7 @@ while not probeStartButton.isClicked():
 while not probeSubmitButtonClicked or q1Answer == 'none' or q2Answer == 'none' or q3Answer == 'none' or q4Answer == 'none' or q5Answer == 'none':
 	displayProbe()
 	if event.getKeys(keyList = ['q','escape']):
+		writeData()
 		core.quit()
 	mouse.clickReset()
 	win.flip()
