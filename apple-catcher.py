@@ -73,6 +73,7 @@ appleNum = 0 # The number of apples dropped so far
 catchStatus = 0 # 1 = hit, 2 = near miss, 3 = miss
 levelChangeTime = 0 # The game time when the level is changed
 prevLevelChangeTime = 0 # Keeps track of the previous level change time
+totalTimePlayed = 0
 
 # Time variables (Unit = seconds)
 practisePlayLength = 1 # Practise play time (excluding pauses)
@@ -723,9 +724,9 @@ def participantDataToCsv():
 		os.makedirs(outputFolderName)
 
 	if condition == 1 or condition == 2:
-		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Time Spent In Level', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Total Time Played', 'Level Change Time', 'Time Spent In Level', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 	elif condition == 3 or condition == 4:
-		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Level Change Time', 'Time Spent In Level', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
+		column_labels = ['Date', 'Time', 'SONA ID', 'Participant #', 'Handedness', 'Condition', 'Yoke ID', 'Pre Q1', 'Pre Q2', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Total Time Played', 'Level Change Time', 'Time Spent In Level', 'Level', 'Apple Drop Time', 'Drop Interval Length', 'Apples Dropped', 'Hits', 'Misses', 'Near Misses', '% Hits', '% Misses', '% Near Misses']
 
 	with open(outputFilePath, 'wb') as new_csvfile: # writes to new file (individual participant data file)
 		writer = csv.DictWriter(new_csvfile, fieldnames = column_labels)
@@ -793,7 +794,7 @@ def displayProbe():
 		probeSubmitErrorMsg.draw()
 
 def writeData():
-	participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'Pre Q2': psQ2Answer,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer})
+	participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'Pre Q2': psQ2Answer,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer, 'Total Time Played': totalTimePlayed})
 	participantDataToCsv()
 	createOvershootLogCsv()
 	createFrameLogCsv()
@@ -882,6 +883,7 @@ if condition == 1:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused:
 		if event.getKeys(keyList = ['q','escape']):
+			totalTimePlayed = gamePlayClock.getTime()
 			logAppleCatchData()
 			writeData()
 			createChangeLogCsv()
@@ -896,6 +898,7 @@ elif condition == 2:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
+			totalTimePlayed = gamePlayClock.getTime()
 			logAppleCatchData()
 			writeData()
 			createCond2LevelCsv() 
@@ -910,6 +913,7 @@ elif condition == 3:
 	levelDataLog[i].update({'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
+			totalTimePlayed = gamePlayClock.getTime()
 			logAppleCatchData()
 			writeData()
 			core.quit()
@@ -922,6 +926,7 @@ elif condition == 4:
 	levelDataLog.append({'Level Change Time': 0, 'Level': difficultyLevel, 'Apple Drop Time': appleDropTime, 'Drop Interval Length': dropIntervalLength})
 	while gamePlayClock.getTime() <= gamePlayLength or gamePaused: 
 		if event.getKeys(keyList = ['q','escape']):
+			totalTimePlayed = gamePlayClock.getTime()
 			logAppleCatchData()
 			writeData()
 			core.quit()
@@ -930,6 +935,8 @@ elif condition == 4:
 		frameNum += 1
 		mouse.clickReset()
 		win.flip()
+
+totalTimePlayed = gamePlayClock.getTime()
 logAppleCatchData()
 
 # Display instruction screen for the probe
@@ -950,7 +957,7 @@ while not probeSubmitButtonClicked or q1Answer == 'none' or q2Answer == 'none' o
 	mouse.clickReset()
 	win.flip()
 
-participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'Pre Q2': psQ2Answer,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer})
+participantDataDict.update({'Date': date, 'Time': time, 'Pre Q1': psQ1Answer, 'Pre Q2': psQ2Answer,'Q1': q1Answer, 'Q2': q2Answer, 'Q3': q3Answer, 'Q4':q4Answer, 'Q5': q5Answer, 'Total Time Played': totalTimePlayed})
 
 # Write all participant data collected over the duration of the experiment to csv files
 participantDataToCsv()
